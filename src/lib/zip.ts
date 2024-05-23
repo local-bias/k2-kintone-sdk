@@ -1,15 +1,47 @@
 import archiver from 'archiver';
 import fs from 'fs-extra';
 import path from 'path';
-import { WORKSPACE_DIRECTORY } from './constants.js';
+import { CONTENTS_DIRECTORY, WORKSPACE_DIRECTORY } from './constants.js';
 
-export const outputContentsZip = async () => {
+export const outputContentsZip = async (
+  manifest: Plugin.Env['manifest']['base']
+) => {
   const archive = archiver('zip', { zlib: { level: 9 } });
 
   const outputZipPath = path.join(WORKSPACE_DIRECTORY, 'contents.zip');
   const outputZipStream = fs.createWriteStream(outputZipPath);
 
-  archive.directory(path.join(WORKSPACE_DIRECTORY, 'contents'), false);
+  const filterLocalContent = (file: string) => {
+    return !/^https?:\/\//.test(file);
+  };
+
+  archive.file(path.join(CONTENTS_DIRECTORY, 'manifest.json'), {
+    name: 'manifest.json',
+  });
+  if (!manifest.config) {
+    throw new Error('manifest.config is required');
+  }
+
+  const targetFiles = [
+    ...new Set([
+      manifest.icon,
+      manifest.config.html!,
+      ...(manifest.desktop?.js || []).filter(filterLocalContent),
+      ...(manifest.desktop?.css || []).filter(filterLocalContent),
+      ...(manifest.mobile?.js || []).filter(filterLocalContent),
+      ...(manifest.mobile?.css || []).filter(filterLocalContent),
+      ...(manifest.config.js || []).filter(filterLocalContent),
+      ...(manifest.config.css || []).filter(filterLocalContent),
+    ]),
+  ];
+
+  targetFiles.forEach((file) => {
+    const filePath = path.join(CONTENTS_DIRECTORY, file);
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`${filePath} does not exist`);
+    }
+    archive.file(filePath, { name: file });
+  });
   archive.pipe(outputZipStream);
   await archive.finalize();
 };

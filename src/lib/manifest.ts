@@ -1,4 +1,4 @@
-import { WORKSPACE_DIRECTORY } from './constants.js';
+import { CONTENTS_DIRECTORY } from './constants.js';
 import { importPluginConfig } from './import.js';
 import fs from 'fs-extra';
 import path from 'path';
@@ -26,16 +26,17 @@ function merge(
 
 export const outputManifest = async (
   env: string,
-  options?: {
-    config?: Plugin.Env;
-  }
-) => {
+  options?: { config?: Plugin.Env }
+): Promise<Plugin.Manifest> => {
   const config = options?.config || (await importPluginConfig());
 
-  const merged = merge(config.manifest.base, config.manifest[env] || {});
+  const merged = merge(
+    config.manifest.base,
+    config.manifest[env] || {}
+  ) as Plugin.Manifest;
 
-  const contentsPath = path.join(WORKSPACE_DIRECTORY, 'contents');
+  await fs.mkdirs(CONTENTS_DIRECTORY);
+  await fs.writeJson(path.join(CONTENTS_DIRECTORY, 'manifest.json'), merged);
 
-  await fs.mkdirs(contentsPath);
-  await fs.writeJson(path.join(contentsPath, 'manifest.json'), merged);
+  return merged;
 };

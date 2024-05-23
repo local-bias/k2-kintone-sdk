@@ -17,7 +17,7 @@ export default function command() {
 export async function action() {
   console.group('🚀 Executing plugin initialization setup');
   try {
-    await outputManifest('dev');
+    const manifest = await outputManifest('dev');
     console.log('📝 manifest.json generated');
 
     await copyPluginContents();
@@ -29,7 +29,7 @@ export async function action() {
       privateKey = await fs.readFile(keyPath, 'utf8');
     }
 
-    await outputContentsZip();
+    await outputContentsZip(manifest);
     const buffer = await getContentsZipBuffer();
 
     const output = await packer(buffer, privateKey);

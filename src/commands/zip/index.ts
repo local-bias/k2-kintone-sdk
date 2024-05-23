@@ -34,10 +34,10 @@ async function action(options: { env: string }): Promise<void> {
     await copyPluginContents();
     console.log('📁 contents copied');
 
-    await outputManifest(env);
+    const manifest = await outputManifest(env);
     console.log(`📝 manifest.json generated (${env})`);
 
-    await outputContentsZip();
+    await outputContentsZip(manifest);
     const buffer = await getContentsZipBuffer();
     const privateKey = await fs.readFile(
       path.join(WORKSPACE_DIRECTORY, 'private.ppk'),
