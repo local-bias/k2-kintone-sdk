@@ -30,9 +30,6 @@ async function action(options: { env: string }): Promise<void> {
     if (env !== 'prod' && env !== 'dev' && env !== 'standalone') {
       throw new Error('Invalid environment');
     }
-    if (fs.existsSync(path.join(WORKSPACE_DIRECTORY, 'contents'))) {
-      await fs.remove(path.join(WORKSPACE_DIRECTORY, 'contents'));
-    }
 
     await copyPluginContents();
     console.log('📁 contents copied');
