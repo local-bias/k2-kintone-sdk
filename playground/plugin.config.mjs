@@ -4,7 +4,7 @@ const cdn = 'https://kintone-plugin.konomi.app';
 const key = 'template';
 const localhost = 'https://127.0.0.1:65535';
 
-/** @satisfies { Plugin.Env } */
+/** @satisfies { Plugin.Meta.Env } */
 export default /** @type { const } */ ({
   id: `ribbit-kintone-plugin-${key}`,
   pluginReleasePageUrl: `https://ribbit.konomi.app/kintone-plugin/`,

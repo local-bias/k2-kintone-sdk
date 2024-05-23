@@ -26,14 +26,14 @@ function merge(
 
 export const outputManifest = async (
   env: string,
-  options?: { config?: Plugin.Env }
-): Promise<Plugin.Manifest> => {
+  options?: { config?: Plugin.Meta.Config }
+): Promise<Plugin.Meta.Manifest> => {
   const config = options?.config || (await importPluginConfig());
 
   const merged = merge(
     config.manifest.base,
     config.manifest[env] || {}
-  ) as Plugin.Manifest;
+  ) as Plugin.Meta.Manifest;
 
   await fs.mkdirs(CONTENTS_DIRECTORY);
   await fs.writeJson(path.join(CONTENTS_DIRECTORY, 'manifest.json'), merged);

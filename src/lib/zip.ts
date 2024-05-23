@@ -3,9 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { CONTENTS_DIRECTORY, WORKSPACE_DIRECTORY } from './constants.js';
 
-export const outputContentsZip = async (
-  manifest: Plugin.Env['manifest']['base']
-) => {
+export const outputContentsZip = async (manifest: Plugin.Meta.Manifest) => {
   const archive = archiver('zip', { zlib: { level: 9 } });
 
   const outputZipPath = path.join(WORKSPACE_DIRECTORY, 'contents.zip');
