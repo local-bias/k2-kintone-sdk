@@ -18,3 +18,7 @@ export const getContentsZipBuffer = async () => {
   const outputZipPath = path.join(WORKSPACE_DIRECTORY, 'contents.zip');
   return fs.readFile(outputZipPath);
 };
+
+export const getZipFileNameSuffix = (env: string) => {
+  return env === 'prod' ? '' : `-${env}`;
+};

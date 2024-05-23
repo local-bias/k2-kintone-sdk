@@ -4,7 +4,11 @@ import fs from 'fs-extra';
 import path from 'path';
 import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
 import packer from '@kintone/plugin-packer';
-import { getContentsZipBuffer, outputContentsZip } from '../../lib/zip.js';
+import {
+  getContentsZipBuffer,
+  getZipFileNameSuffix,
+  outputContentsZip,
+} from '../../lib/zip.js';
 
 export default function command(): void {
   program
@@ -25,6 +29,10 @@ async function action(options: { env: string }): Promise<void> {
     if (env !== 'prod' && env !== 'dev' && env !== 'standalone') {
       throw new Error('Invalid environment');
     }
+    if (fs.existsSync(path.join(WORKSPACE_DIRECTORY, 'contents'))) {
+      await fs.remove(path.join(WORKSPACE_DIRECTORY, 'contents'));
+    }
+
     await fs.copySync(
       path.join('src', 'contents'),
       path.join(WORKSPACE_DIRECTORY, 'contents'),
@@ -43,13 +51,15 @@ async function action(options: { env: string }): Promise<void> {
 
     const output = await packer(buffer, privateKey);
 
+    const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
+
     await fs.writeFile(
-      path.join(WORKSPACE_DIRECTORY, 'plugin.zip'),
+      path.join(WORKSPACE_DIRECTORY, zipFileName),
       output.plugin
     );
     console.log('📦 plugin.zip generated');
     console.log(
-      '✨ Plugin zip generation completed! zip file path is ./.plugin/plugin.zip'
+      `✨ Plugin zip generation completed! zip file path is ./.plugin/${zipFileName}`
     );
   } catch (error) {
     throw error;
