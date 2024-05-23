@@ -9,6 +9,7 @@ import {
   getZipFileNameSuffix,
   outputContentsZip,
 } from '../../lib/zip.js';
+import { copyPluginContents } from '../../lib/plugin-contents.js';
 
 export default function command(): void {
   program
@@ -33,21 +34,18 @@ async function action(options: { env: string }): Promise<void> {
       await fs.remove(path.join(WORKSPACE_DIRECTORY, 'contents'));
     }
 
-    await fs.copySync(
-      path.join('src', 'contents'),
-      path.join(WORKSPACE_DIRECTORY, 'contents'),
-      { overwrite: true }
-    );
+    await copyPluginContents();
     console.log('📁 contents copied');
+
     await outputManifest(env);
     console.log(`📝 manifest.json generated (${env})`);
 
     await outputContentsZip();
     const buffer = await getContentsZipBuffer();
-    const privateKeyFile = await fs.readFile(
-      path.join(WORKSPACE_DIRECTORY, 'private.ppk')
+    const privateKey = await fs.readFile(
+      path.join(WORKSPACE_DIRECTORY, 'private.ppk'),
+      'utf8'
     );
-    const privateKey = privateKeyFile.toString();
 
     const output = await packer(buffer, privateKey);
 

@@ -3,6 +3,7 @@ import { outputManifest } from '../../lib/manifest.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import { copyPluginContents } from '../../lib/plugin-contents.js';
 
 export default function command(): void {
   program
@@ -18,12 +19,10 @@ async function action(options: { env: string }): Promise<void> {
     if (env !== 'prod' && env !== 'dev' && env !== 'standalone') {
       throw new Error('Invalid environment');
     }
-    await fs.copySync(
-      path.join('src', 'contents'),
-      path.join(WORKSPACE_DIRECTORY, 'contents'),
-      { overwrite: true }
-    );
+
+    await copyPluginContents();
     console.log('📁 contents copied');
+
     await outputManifest(env);
     console.log(`📝 manifest.json generated (${env})`);
   } catch (error) {

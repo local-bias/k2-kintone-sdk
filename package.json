@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-plugin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "./dist/index.js",
   "type": "module",
@@ -23,16 +23,18 @@
   "license": "ISC",
   "dependencies": {
     "@kintone/plugin-packer": "^8",
-    "@kintone/plugin-uploader": "^9.1.1",
+    "@kintone/plugin-uploader": "^9",
     "archiver": "^7",
     "chalk": "^5",
     "commander": "^12",
-    "dotenv": "^16.4.5",
-    "fs-extra": "^11"
+    "dotenv": "^16",
+    "fs-extra": "^11",
+    "html-minifier": "^4"
   },
   "devDependencies": {
     "@types/archiver": "*",
     "@types/fs-extra": "*",
+    "@types/html-minifier": "^4",
     "typescript": "*"
   }
 }
