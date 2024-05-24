@@ -8,6 +8,6 @@ export const esmImport = (path: string) => {
   }
 };
 
-export const importPluginConfig = async () => {
+export const importPluginConfig = async (): Promise<Plugin.Meta.Config> => {
   return (await esmImport('plugin.config.mjs')).default;
 };

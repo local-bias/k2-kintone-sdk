@@ -8,5 +8,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@konomi-app/kintone-utilities": "^5.6.2",
+    "@konomi-app/kintone-utilities-react": "^1.15.3"
+  }
 }

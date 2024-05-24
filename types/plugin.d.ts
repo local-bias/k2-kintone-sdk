@@ -75,6 +75,10 @@ declare namespace Plugin {
       promotionPageUrl?: string;
       bannerPageUrl?: string;
       config_params?: Record<string, any>;
+      server?: {
+        /** 0から65535までのポート番号 */
+        port?: number;
+      };
     };
   }
 }

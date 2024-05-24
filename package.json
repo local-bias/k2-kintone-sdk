@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-plugin",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "",
   "main": "./dist/index.js",
   "type": "module",
@@ -26,10 +26,12 @@
     "@kintone/plugin-uploader": "^9",
     "archiver": "^7",
     "chalk": "^5",
+    "chokidar": "^3",
     "commander": "^12",
     "dotenv": "^16",
     "fs-extra": "^11",
-    "html-minifier": "^4"
+    "html-minifier": "^4",
+    "vite": "^5"
   },
   "devDependencies": {
     "@types/archiver": "*",

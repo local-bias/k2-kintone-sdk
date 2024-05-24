@@ -1,8 +1,8 @@
 import { program } from 'commander';
 import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
 import { getZipFileNameSuffix } from '../../lib/zip.js';
-import { exec } from 'child_process';
 import { config } from 'dotenv';
+import { exec } from '../../lib/exec.js';
 
 export default function command(): void {
   program
@@ -17,6 +17,7 @@ export default function command(): void {
 }
 
 async function action(options: { env: string }): Promise<void> {
+  console.group('🚀 Uploading plugin.zip to your kintone');
   try {
     config();
     const { env } = options;
@@ -44,16 +45,13 @@ KINTONE_PASSWORD
     }
     command += ' --watch --waiting-dialog-ms 3000';
 
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`error: ${error}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
-    });
-    console.log('🚀 Uploading plugin.zip to your kintone');
+    const { stderr } = await exec(command);
+    if (stderr) {
+      console.error(JSON.stringify(stderr, null, 2));
+    }
   } catch (error) {
     throw error;
+  } finally {
+    console.groupEnd();
   }
 }

@@ -25,7 +25,7 @@ function merge(
 }
 
 export const outputManifest = async (
-  env: string,
+  env: 'dev' | 'prod' | 'standalone',
   options?: { config?: Plugin.Meta.Config }
 ): Promise<Plugin.Meta.Manifest> => {
   const config = options?.config || (await importPluginConfig());
