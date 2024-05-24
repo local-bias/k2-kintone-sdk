@@ -1,8 +1,5 @@
 import { program } from 'commander';
-import { outputManifest } from '../../lib/manifest.js';
-import fs from 'fs-extra';
-import path from 'path';
-import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import { outputManifest } from '../../lib/plugin-manifest.js';
 import { copyPluginContents } from '../../lib/plugin-contents.js';
 
 export default function command(): void {

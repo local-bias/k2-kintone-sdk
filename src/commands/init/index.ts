@@ -2,7 +2,7 @@ import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
 import packer from '@kintone/plugin-packer';
-import { outputManifest } from '../../lib/manifest.js';
+import { outputManifest } from '../../lib/plugin-manifest.js';
 import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
 import { getContentsZipBuffer, outputContentsZip } from '../../lib/zip.js';
 import { copyPluginContents } from '../../lib/plugin-contents.js';

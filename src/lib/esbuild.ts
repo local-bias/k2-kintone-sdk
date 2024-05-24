@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import esbuild, { Plugin } from 'esbuild';
+import esbuild, { Plugin, type BuildOptions } from 'esbuild';
 import path from 'path';
 import { compile } from 'sass';
 import { resolve } from 'path';
@@ -44,16 +44,17 @@ export const getSassPlugin = (): Plugin => {
   };
 };
 
-export const buildWithEsbuild = async () => {
+export const buildWithEsbuild = async (params: {
+  entryPoints: BuildOptions['entryPoints'];
+  outdir: string;
+}) => {
+  const { entryPoints, outdir } = params;
   const context = await esbuild.context({
-    entryPoints: ['desktop', 'config'].map((dir) => ({
-      in: path.join('src', dir, 'index.ts'),
-      out: dir,
-    })),
+    entryPoints,
     bundle: true,
     sourcemap: 'inline',
     platform: 'browser',
-    outdir: DEVELOPMENT_DIRECTORY,
+    outdir,
     plugins: [
       {
         name: 'on-end',
@@ -62,7 +63,7 @@ export const buildWithEsbuild = async () => {
             console.log(
               chalk.hex('#d1d5db')(`${new Date().toLocaleTimeString()} `) +
                 chalk.cyan(`[content] `) +
-                `変更を反映しました`
+                `Compiled successfully.`
             )
           ),
       },

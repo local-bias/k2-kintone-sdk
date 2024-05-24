@@ -9,7 +9,7 @@ import {
   WORKSPACE_DIRECTORY,
 } from '../../lib/constants.js';
 import fs from 'fs-extra';
-import { outputManifest } from '../../lib/manifest.js';
+import { outputManifest } from '../../lib/plugin-manifest.js';
 import { copyPluginContents } from '../../lib/plugin-contents.js';
 import chokider from 'chokidar';
 import { generateCert } from '../../lib/cert.js';
@@ -115,7 +115,7 @@ export async function action() {
     );
 
     if (!fs.existsSync(privateKeyPath) || !fs.existsSync(certificatePath)) {
-      await generateCert();
+      await generateCert(WORKSPACE_DIRECTORY);
       console.log('🔑 Certificate generated');
     }
 
@@ -126,7 +126,13 @@ export async function action() {
 
     const res = server.listen(port);
 
-    buildWithEsbuild();
+    buildWithEsbuild({
+      entryPoints: ['desktop', 'config'].map((dir) => ({
+        in: path.join('src', dir, 'index.ts'),
+        out: dir,
+      })),
+      outdir: DEVELOPMENT_DIRECTORY,
+    });
 
     res.on('error', (error) => {
       console.error(error);

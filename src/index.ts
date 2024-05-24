@@ -9,7 +9,7 @@ import test from './commands/test/index.js';
 import upload from './commands/upload/index.js';
 import zip from './commands/zip/index.js';
 
-program.name('plugin').version('0.0.1').description('');
+program.name('k2').version('0.1.0').description('');
 
 build();
 dev();
