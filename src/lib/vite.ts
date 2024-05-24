@@ -1,14 +1,18 @@
 import { InlineConfig } from 'vite';
 import path from 'path';
 import fs from 'fs-extra';
-import { DEFAULT_PORT, WORKSPACE_DIRECTORY } from './constants.js';
+import {
+  DEFAULT_PORT,
+  DEVELOPMENT_DIRECTORY,
+  WORKSPACE_DIRECTORY,
+} from './constants.js';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export const getViteConfig = (config: Plugin.Meta.Config): InlineConfig => {
   return {
     configFile: false,
     build: {
-      outDir: path.join(WORKSPACE_DIRECTORY, 'dev'),
+      outDir: DEVELOPMENT_DIRECTORY,
       emptyOutDir: true,
       rollupOptions: {
         input: {

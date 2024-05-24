@@ -3,11 +3,24 @@ import { importPluginConfig } from '../../lib/import.js';
 import express from 'express';
 import { createServer } from 'https';
 import path from 'path';
-import { DEFAULT_PORT, WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import {
+  DEFAULT_PORT,
+  DEVELOPMENT_DIRECTORY,
+  WORKSPACE_DIRECTORY,
+} from '../../lib/constants.js';
 import fs from 'fs-extra';
 import { outputManifest } from '../../lib/manifest.js';
 import { copyPluginContents } from '../../lib/plugin-contents.js';
 import chokider from 'chokidar';
+import { generateCert } from '../../lib/cert.js';
+import {
+  getContentsZipBuffer,
+  getZipFileNameSuffix,
+  outputContentsZip,
+} from '../../lib/zip.js';
+import packer from '@kintone/plugin-packer';
+import { uploadZip } from '../../lib/utils.js';
+import { buildWithEsbuild } from '../../lib/esbuild.js';
 
 export default function command() {
   program
@@ -23,7 +36,7 @@ export async function action() {
 
     const port = config.server?.port ?? DEFAULT_PORT;
 
-    await outputManifest('dev', {
+    const manifest = await outputManifest('dev', {
       config: {
         ...config,
         manifest: {
@@ -70,20 +83,50 @@ export async function action() {
     watcher.on('add', contentsListener);
     watcher.on('unlink', contentsListener);
 
+    await outputContentsZip(manifest);
+    const buffer = await getContentsZipBuffer();
+    const pluginPrivateKey = await fs.readFile(
+      path.join(WORKSPACE_DIRECTORY, 'private.ppk'),
+      'utf8'
+    );
+
+    const output = await packer(buffer, pluginPrivateKey);
+
+    const zipFileName = `plugin${getZipFileNameSuffix('dev')}.zip`;
+
+    await fs.writeFile(
+      path.join(WORKSPACE_DIRECTORY, zipFileName),
+      output.plugin
+    );
+
+    uploadZip('dev').then(({ stdout, stderr }) => {
+      console.log(stdout);
+      console.error(stderr);
+    });
+
     const app = express();
 
-    app.use(express.static(path.join(WORKSPACE_DIRECTORY, 'dev')));
+    app.use(express.static(DEVELOPMENT_DIRECTORY));
 
-    const privateKey = fs.readFileSync(
-      path.join(WORKSPACE_DIRECTORY, 'localhost-key.pem')
+    const privateKeyPath = path.join(WORKSPACE_DIRECTORY, 'localhost-key.pem');
+    const certificatePath = path.join(
+      WORKSPACE_DIRECTORY,
+      'localhost-cert.pem'
     );
-    const certificate = fs.readFileSync(
-      path.join(WORKSPACE_DIRECTORY, 'localhost-cert.pem')
-    );
+
+    if (!fs.existsSync(privateKeyPath) || !fs.existsSync(certificatePath)) {
+      await generateCert();
+      console.log('🔑 Certificate generated');
+    }
+
+    const privateKey = fs.readFileSync(privateKeyPath);
+    const certificate = fs.readFileSync(certificatePath);
 
     const server = createServer({ key: privateKey, cert: certificate }, app);
 
     const res = server.listen(port);
+
+    buildWithEsbuild();
 
     res.on('error', (error) => {
       console.error(error);

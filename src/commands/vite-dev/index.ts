@@ -3,8 +3,7 @@ import { createServer, build } from 'vite';
 import { importPluginConfig } from '../../lib/import.js';
 import { getViteConfig } from '../../lib/vite.js';
 import chokidar from 'chokidar';
-import path from 'path';
-import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import { DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
 
 export default function command() {
   program
@@ -44,7 +43,7 @@ export async function action() {
 
     const server = await createServer({
       ...viteConfig,
-      root: path.join(WORKSPACE_DIRECTORY, 'dev'),
+      root: DEVELOPMENT_DIRECTORY,
     });
     await server.listen();
 

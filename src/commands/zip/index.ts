@@ -10,6 +10,7 @@ import {
   outputContentsZip,
 } from '../../lib/zip.js';
 import { copyPluginContents } from '../../lib/plugin-contents.js';
+import { isEnv } from '../../lib/utils.js';
 
 export default function command(): void {
   program
@@ -27,7 +28,7 @@ async function action(options: { env: string }): Promise<void> {
   console.group('🚀 Executing plugin zip generation');
   try {
     const { env } = options;
-    if (env !== 'prod' && env !== 'dev' && env !== 'standalone') {
+    if (!isEnv(env)) {
       throw new Error('Invalid environment');
     }
 

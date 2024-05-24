@@ -24,6 +24,8 @@ type Resources = {
 
 declare namespace Plugin {
   namespace Meta {
+    type Env = 'dev' | 'prod' | 'standalone';
+
     type Manifest = {
       type: 'APP';
       manifest_version: 1;

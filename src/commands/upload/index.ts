@@ -1,8 +1,6 @@
 import { program } from 'commander';
-import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
-import { getZipFileNameSuffix } from '../../lib/zip.js';
 import { config } from 'dotenv';
-import { exec } from '../../lib/exec.js';
+import { isEnv, uploadZip } from '../../lib/utils.js';
 
 export default function command(): void {
   program
@@ -21,31 +19,10 @@ async function action(options: { env: string }): Promise<void> {
   try {
     config();
     const { env } = options;
-
-    const {
-      KINTONE_BASE_URL,
-      KINTONE_USERNAME,
-      KINTONE_PASSWORD,
-      KINTONE_BASIC_AUTH_USERNAME = '',
-      KINTONE_BASIC_AUTH_PASSWORD = '',
-    } = process.env;
-    if (!KINTONE_BASE_URL || !KINTONE_USERNAME || !KINTONE_PASSWORD) {
-      throw new Error(`.envの設定が不十分です。以下のパラメータは必須です
-KINTONE_BASE_URL
-KINTONE_USERNAME
-KINTONE_PASSWORD
-      `);
+    if (!isEnv(env)) {
+      throw new Error('Invalid environment');
     }
-
-    const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
-
-    let command = `kintone-plugin-uploader ${WORKSPACE_DIRECTORY}/${zipFileName} --base-url ${KINTONE_BASE_URL} --username ${KINTONE_USERNAME} --password ${KINTONE_PASSWORD}`;
-    if (KINTONE_BASIC_AUTH_USERNAME && KINTONE_BASIC_AUTH_PASSWORD) {
-      command += ` --basic-auth-username ${KINTONE_BASIC_AUTH_USERNAME} --basic-auth-password ${KINTONE_BASIC_AUTH_PASSWORD}`;
-    }
-    command += ' --watch --waiting-dialog-ms 3000';
-
-    const { stderr } = await exec(command);
+    const { stderr } = await uploadZip(env);
     if (stderr) {
       console.error(JSON.stringify(stderr, null, 2));
     }
