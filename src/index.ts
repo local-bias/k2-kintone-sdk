@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { program } from 'commander';
 import build from './commands/build/index.js';
-import dev from './commands/dev/index.js';
-import genkey from './commands/genkey/index.js';
+import dev from './commands/dev.js';
+import genkey from './commands/genkey.js';
 import init from './commands/init/index.js';
 import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';

@@ -1,26 +1,24 @@
 import { program } from 'commander';
-import { importPluginConfig } from '../../lib/import.js';
-import express from 'express';
-import { createServer } from 'https';
+import { importPluginConfig } from '../lib/import.js';
 import path from 'path';
 import {
   DEFAULT_PORT,
   DEVELOPMENT_DIRECTORY,
   WORKSPACE_DIRECTORY,
-} from '../../lib/constants.js';
+} from '../lib/constants.js';
 import fs from 'fs-extra';
-import { outputManifest } from '../../lib/plugin-manifest.js';
-import { copyPluginContents } from '../../lib/plugin-contents.js';
+import { outputManifest } from '../lib/plugin-manifest.js';
+import { copyPluginContents } from '../lib/plugin-contents.js';
 import chokider from 'chokidar';
-import { generateCert } from '../../lib/cert.js';
 import {
   getContentsZipBuffer,
   getZipFileNameSuffix,
   outputContentsZip,
-} from '../../lib/zip.js';
+} from '../lib/zip.js';
 import packer from '@kintone/plugin-packer';
-import { uploadZip } from '../../lib/utils.js';
-import { buildWithEsbuild } from '../../lib/esbuild.js';
+import { uploadZip } from '../lib/utils.js';
+import base from './dev-base.js';
+import { BuildOptions } from 'esbuild';
 
 export default function command() {
   program
@@ -104,41 +102,25 @@ export async function action() {
       console.error(stderr);
     });
 
-    const app = express();
+    const srcDir = path.join('src', 'apps');
+    const dirs = fs.readdirSync(srcDir);
 
-    app.use(express.static(DEVELOPMENT_DIRECTORY));
+    const entryPoints: BuildOptions['entryPoints'] = dirs.reduce<
+      { in: string; out: string }[]
+    >((acc, dir) => {
+      for (const filename of ['index.ts', 'index.js', 'index.mjs']) {
+        if (fs.existsSync(path.join(srcDir, dir, filename))) {
+          return [...acc, { in: path.join(srcDir, dir, filename), out: dir }];
+        }
+      }
+      return acc;
+    }, []);
 
-    const privateKeyPath = path.join(WORKSPACE_DIRECTORY, 'localhost-key.pem');
-    const certificatePath = path.join(
-      WORKSPACE_DIRECTORY,
-      'localhost-cert.pem'
-    );
-
-    if (!fs.existsSync(privateKeyPath) || !fs.existsSync(certificatePath)) {
-      await generateCert(WORKSPACE_DIRECTORY);
-      console.log('🔑 Certificate generated');
-    }
-
-    const privateKey = fs.readFileSync(privateKeyPath);
-    const certificate = fs.readFileSync(certificatePath);
-
-    const server = createServer({ key: privateKey, cert: certificate }, app);
-
-    const res = server.listen(port);
-
-    buildWithEsbuild({
-      entryPoints: ['desktop', 'config'].map((dir) => ({
-        in: path.join('src', dir, 'index.ts'),
-        out: dir,
-      })),
-      outdir: DEVELOPMENT_DIRECTORY,
-    });
-
-    res.on('error', (error) => {
-      console.error(error);
-    });
-    res.on('listening', () => {
-      console.log(`🚀 Server started! https://localhost:${port}`);
+    base({
+      port,
+      entryPoints,
+      certDir: WORKSPACE_DIRECTORY,
+      staticDir: DEVELOPMENT_DIRECTORY,
     });
   } catch (error) {
     throw error;
