@@ -2,6 +2,7 @@ import { InlineConfig } from 'vite';
 import path from 'path';
 import fs from 'fs-extra';
 import { DEFAULT_PORT, WORKSPACE_DIRECTORY } from './constants.js';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export const getViteConfig = (config: Plugin.Meta.Config): InlineConfig => {
   return {
@@ -21,6 +22,7 @@ export const getViteConfig = (config: Plugin.Meta.Config): InlineConfig => {
         },
       },
     },
+    plugins: [tsconfigPaths()],
     server: {
       port: config.server?.port ?? DEFAULT_PORT,
       https: {
@@ -31,6 +33,9 @@ export const getViteConfig = (config: Plugin.Meta.Config): InlineConfig => {
           path.join(WORKSPACE_DIRECTORY, 'localhost-cert.pem')
         ),
       },
+    },
+    resolve: {
+      alias: { '@': path.resolve('src') },
     },
   };
 };

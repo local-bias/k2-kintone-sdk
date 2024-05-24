@@ -18,18 +18,28 @@ export async function action() {
   try {
     const config = await importPluginConfig();
 
-    const watcher = chokidar.watch(['src/**/*.(js|ts|mjs)'], {
+    const watcher = chokidar.watch(['src/**/*.{ts,js,jsx,tsx}'], {
       ignored: /node_modules/,
       persistent: true,
     });
 
     const viteConfig = getViteConfig(config);
 
-    const listener = async () => build({ ...viteConfig, mode: 'development' });
+    const listener = async () =>
+      build({
+        ...viteConfig,
+        mode: 'development',
+        build: {
+          ...viteConfig.build,
+          sourcemap: 'inline',
+        },
+      });
 
     await listener();
 
     watcher.on('change', listener);
+    watcher.on('add', listener);
+    watcher.on('unlink', listener);
 
     const server = await createServer({
       ...viteConfig,
