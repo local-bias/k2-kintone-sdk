@@ -1,10 +1,13 @@
 import { program } from 'commander';
-import { createServer, build } from 'vite';
 import { importPluginConfig } from '../../lib/import.js';
-import { getViteConfig } from '../../lib/vite.js';
-import chokidar from 'chokidar';
+import express from 'express';
+import { createServer } from 'https';
 import path from 'path';
-import { WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import { DEFAULT_PORT, WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import fs from 'fs-extra';
+import { outputManifest } from '../../lib/manifest.js';
+import { copyPluginContents } from '../../lib/plugin-contents.js';
+import chokider from 'chokidar';
 
 export default function command() {
   program
@@ -18,37 +21,76 @@ export async function action() {
   try {
     const config = await importPluginConfig();
 
-    const watcher = chokidar.watch(['src/**/*.{ts,js,jsx,tsx}'], {
+    const port = config.server?.port ?? DEFAULT_PORT;
+
+    await outputManifest('dev', {
+      config: {
+        ...config,
+        manifest: {
+          ...config.manifest,
+          dev: {
+            config: {
+              ...config.manifest?.dev?.config,
+              js: [`https://localhost:${port}/config.js`],
+              css: [`https://localhost:${port}/config.css`],
+            },
+            desktop: {
+              ...config.manifest?.dev?.desktop,
+              js: [`https://localhost:${port}/desktop.js`],
+              css: [`https://localhost:${port}/desktop.css`],
+            },
+            mobile: {
+              ...config.manifest?.dev?.mobile,
+              js: [`https://localhost:${port}/desktop.js`],
+              css: [`https://localhost:${port}/desktop.css`],
+            },
+          },
+        },
+      },
+    });
+    console.log(`📝 manifest.json generated`);
+
+    const contentsListener = async () => {
+      try {
+        await copyPluginContents();
+        console.log('📁 contents updated');
+      } catch (error) {
+        console.error('📁 contents update failed');
+      }
+    };
+
+    await contentsListener();
+
+    const watcher = chokider.watch(['src/contents/**/*'], {
       ignored: /node_modules/,
       persistent: true,
     });
 
-    const viteConfig = getViteConfig(config);
+    watcher.on('change', contentsListener);
+    watcher.on('add', contentsListener);
+    watcher.on('unlink', contentsListener);
 
-    const listener = async () =>
-      build({
-        ...viteConfig,
-        mode: 'development',
-        build: {
-          ...viteConfig.build,
-          sourcemap: 'inline',
-        },
-      });
+    const app = express();
 
-    await listener();
+    app.use(express.static(path.join(WORKSPACE_DIRECTORY, 'dev')));
 
-    watcher.on('change', listener);
-    watcher.on('add', listener);
-    watcher.on('unlink', listener);
+    const privateKey = fs.readFileSync(
+      path.join(WORKSPACE_DIRECTORY, 'localhost-key.pem')
+    );
+    const certificate = fs.readFileSync(
+      path.join(WORKSPACE_DIRECTORY, 'localhost-cert.pem')
+    );
 
-    const server = await createServer({
-      ...viteConfig,
-      root: path.join(WORKSPACE_DIRECTORY, 'dev'),
-      build: undefined,
+    const server = createServer({ key: privateKey, cert: certificate }, app);
+
+    const res = server.listen(port);
+
+    res.on('error', (error) => {
+      console.error(error);
     });
-    await server.listen();
-
-    server.printUrls();
+    res.on('listening', () => {
+      console.log(`🚀 Server started! https://localhost:${port}`);
+    });
   } catch (error) {
     throw error;
   } finally {
