@@ -20,6 +20,12 @@ export const getViteConfig = (config: Plugin.Meta.Config): InlineConfig => {
           chunkFileNames: '[name].js',
           assetFileNames: '[name].[ext]',
         },
+        onwarn: (warning, warn) => {
+          if (['MODULE_LEVEL_DIRECTIVE'].includes(warning.code ?? '')) {
+            return;
+          }
+          warn(warning);
+        },
       },
     },
     plugins: [tsconfigPaths()],

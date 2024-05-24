@@ -2,6 +2,7 @@ import { program } from 'commander';
 import { build } from 'vite';
 import { importPluginConfig } from '../../lib/import.js';
 import { getViteConfig } from '../../lib/vite.js';
+import { CONTENTS_DIRECTORY } from '../../lib/constants.js';
 
 export default function command() {
   program
@@ -19,7 +20,11 @@ export async function action() {
 
     const viteConfig = getViteConfig(config);
 
-    await build({ ...viteConfig, mode: 'production' });
+    await build({
+      ...viteConfig,
+      mode: 'production',
+      build: { ...viteConfig.build, outDir: CONTENTS_DIRECTORY },
+    });
 
     console.log('✨ Build success.');
   } catch (error) {
