@@ -10,6 +10,5 @@ export default function command() {
 }
 
 export async function action(options: { output: string }) {
-  const { output } = options;
-  await base({ output });
+  await base(options);
 }
