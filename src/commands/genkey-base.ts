@@ -6,8 +6,10 @@ export default async function action(options: { output: string }) {
   console.group('🍳 Generate SSL key for localhost');
   try {
     const { stdout } = await generateCert(output);
-    console.log(stdout);
-    console.log(`🔑 key generation success. Output to ${output}.`);
+    if (stdout) {
+      console.log(stdout);
+    }
+    console.log(`🔑 key generation success. Output to ./${output}`);
   } catch (error) {
     throw error;
   } finally {

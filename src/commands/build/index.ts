@@ -12,7 +12,7 @@ export default function command() {
 }
 
 export async function action() {
-  console.group('🚀 Build the project for production');
+  console.group('🍳 Build the project for production');
   try {
     const config = await importPluginConfig();
 

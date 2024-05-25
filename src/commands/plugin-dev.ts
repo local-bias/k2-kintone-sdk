@@ -23,7 +23,7 @@ export default function command() {
 }
 
 export async function action() {
-  console.group('🚀 Start development server');
+  console.group('🍳 Start development server');
   try {
     const config = await importPluginConfig();
 

@@ -1,12 +1,12 @@
 import { program } from 'commander';
-import { outputManifest } from '../../lib/plugin-manifest.js';
+import { outputManifest } from '../lib/plugin-manifest.js';
 import fs from 'fs-extra';
 import path from 'path';
-import { PLUGIN_WORKSPACE_DIRECTORY } from '../../lib/constants.js';
+import { PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
 import packer from '@kintone/plugin-packer';
-import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '../../lib/zip.js';
-import { copyPluginContents } from '../../lib/plugin-contents.js';
-import { isEnv } from '../../lib/utils.js';
+import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '../lib/zip.js';
+import { copyPluginContents } from '../lib/plugin-contents.js';
+import { isEnv } from '../lib/utils.js';
 
 export default function command(): void {
   program

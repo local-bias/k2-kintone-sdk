@@ -2,25 +2,22 @@ import { program } from 'commander';
 import { BuildOptions } from 'esbuild';
 import fs from 'fs-extra';
 import path from 'path';
-import {
-  DEFAULT_PORT,
-  PLUGIN_DEVELOPMENT_DIRECTORY,
-  PLUGIN_WORKSPACE_DIRECTORY,
-} from '../lib/constants.js';
-import { importPluginConfig } from '../lib/import.js';
+import { DEFAULT_PORT, DEVELOPMENT_DIRECTORY, WORKSPACE_DIRECTORY } from '../lib/constants.js';
 import base from './dev-base.js';
 
 export default function command() {
-  program.command('dev').description('Start development server.').action(action);
+  program
+    .command('dev')
+    .description('Start development server.')
+    .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
+    .option('-p, --port <port>', 'Port number', DEFAULT_PORT.toString())
+    .action(action);
 }
 
-export async function action() {
-  console.group('🚀 Start development server');
+export async function action(options: { outdir: string; port: string }) {
+  const { outdir, port } = options;
+  console.group('🍳 Start development server');
   try {
-    const config = await importPluginConfig();
-
-    const port = config.server?.port ?? DEFAULT_PORT;
-
     const srcDir = path.join('src', 'apps');
     const dirs = fs.readdirSync(srcDir);
 
@@ -37,10 +34,10 @@ export async function action() {
     );
 
     base({
-      port,
+      port: Number(port),
       entryPoints,
-      certDir: PLUGIN_WORKSPACE_DIRECTORY,
-      staticDir: PLUGIN_DEVELOPMENT_DIRECTORY,
+      certDir: WORKSPACE_DIRECTORY,
+      staticDir: outdir,
     });
   } catch (error) {
     throw error;

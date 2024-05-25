@@ -7,7 +7,6 @@ import init from './commands/init/index.js';
 import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
 import upload from './commands/upload/index.js';
-import zip from './commands/zip/index.js';
 
 program.name('k2').version('0.1.0').description('');
 
@@ -18,6 +17,5 @@ init();
 manifest();
 test();
 upload();
-zip();
 
 program.parse(process.argv);
