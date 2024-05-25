@@ -2,14 +2,12 @@ import { program } from 'commander';
 import { build } from 'vite';
 import { importPluginConfig } from '../../lib/import.js';
 import { getViteConfig } from '../../lib/vite.js';
-import { CONTENTS_DIRECTORY } from '../../lib/constants.js';
+import { PLUGIN_CONTENTS_DIRECTORY } from '../../lib/constants.js';
 
 export default function command() {
   program
     .command('build')
-    .description(
-      "Build the project for production. (It's a wrapper of Vite build command.)"
-    )
+    .description("Build the project for production. (It's a wrapper of Vite build command.)")
     .action(action);
 }
 
@@ -23,7 +21,7 @@ export async function action() {
     await build({
       ...viteConfig,
       mode: 'production',
-      build: { ...viteConfig.build, outDir: CONTENTS_DIRECTORY },
+      build: { ...viteConfig.build, outDir: PLUGIN_CONTENTS_DIRECTORY },
     });
 
     console.log('✨ Build success.');

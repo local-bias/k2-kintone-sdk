@@ -2,7 +2,11 @@ import { program } from 'commander';
 import { BuildOptions } from 'esbuild';
 import fs from 'fs-extra';
 import path from 'path';
-import { DEFAULT_PORT, DEVELOPMENT_DIRECTORY, WORKSPACE_DIRECTORY } from '../lib/constants.js';
+import {
+  DEFAULT_PORT,
+  PLUGIN_DEVELOPMENT_DIRECTORY,
+  PLUGIN_WORKSPACE_DIRECTORY,
+} from '../lib/constants.js';
 import { importPluginConfig } from '../lib/import.js';
 import base from './dev-base.js';
 
@@ -35,8 +39,8 @@ export async function action() {
     base({
       port,
       entryPoints,
-      certDir: WORKSPACE_DIRECTORY,
-      staticDir: DEVELOPMENT_DIRECTORY,
+      certDir: PLUGIN_WORKSPACE_DIRECTORY,
+      staticDir: PLUGIN_DEVELOPMENT_DIRECTORY,
     });
   } catch (error) {
     throw error;

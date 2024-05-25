@@ -1,4 +1,4 @@
-import { WORKSPACE_DIRECTORY } from './constants.js';
+import { PLUGIN_WORKSPACE_DIRECTORY } from './constants.js';
 import { exec } from './exec.js';
 import { getZipFileNameSuffix } from './zip.js';
 import { config } from 'dotenv';
@@ -27,7 +27,7 @@ KINTONE_PASSWORD
 
   const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
 
-  let command = `kintone-plugin-uploader ${WORKSPACE_DIRECTORY}/${zipFileName} --base-url ${KINTONE_BASE_URL} --username ${KINTONE_USERNAME} --password ${KINTONE_PASSWORD}`;
+  let command = `kintone-plugin-uploader ${PLUGIN_WORKSPACE_DIRECTORY}/${zipFileName} --base-url ${KINTONE_BASE_URL} --username ${KINTONE_USERNAME} --password ${KINTONE_PASSWORD}`;
   if (KINTONE_BASIC_AUTH_USERNAME && KINTONE_BASIC_AUTH_PASSWORD) {
     command += ` --basic-auth-username ${KINTONE_BASIC_AUTH_USERNAME} --basic-auth-password ${KINTONE_BASIC_AUTH_PASSWORD}`;
   }

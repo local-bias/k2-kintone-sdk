@@ -1,19 +1,14 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { CONTENTS_DIRECTORY } from './constants.js';
+import { PLUGIN_CONTENTS_DIRECTORY } from './constants.js';
 import htmlMinifier from 'html-minifier';
 
 export const copyPluginContents = async () => {
-  await fs.copySync(
-    path.join('src', 'contents'),
-    path.join(CONTENTS_DIRECTORY),
-    { overwrite: true }
-  );
+  await fs.copySync(path.join('src', 'contents'), path.join(PLUGIN_CONTENTS_DIRECTORY), {
+    overwrite: true,
+  });
 
-  const html = await fs.readFile(
-    path.join(CONTENTS_DIRECTORY, 'config.html'),
-    'utf8'
-  );
+  const html = await fs.readFile(path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.html'), 'utf8');
 
   const minified = htmlMinifier.minify(html, {
     minifyCSS: true,
@@ -26,5 +21,5 @@ export const copyPluginContents = async () => {
     useShortDoctype: true,
   });
 
-  await fs.writeFile(path.join(CONTENTS_DIRECTORY, 'config.html'), minified);
+  await fs.writeFile(path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.html'), minified);
 };

@@ -1,6 +1,6 @@
 import { program } from 'commander';
 import base from './genkey-base.js';
-import { WORKSPACE_DIRECTORY } from '../lib/constants.js';
+import { PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
 
 export default function command() {
   program
@@ -10,5 +10,5 @@ export default function command() {
 }
 
 export async function action() {
-  await base({ output: WORKSPACE_DIRECTORY });
+  await base({ output: PLUGIN_WORKSPACE_DIRECTORY });
 }

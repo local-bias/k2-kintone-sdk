@@ -3,7 +3,7 @@ import esbuild, { Plugin, type BuildOptions } from 'esbuild';
 import path from 'path';
 import { compile } from 'sass';
 import { resolve } from 'path';
-import { DEVELOPMENT_DIRECTORY } from './constants.js';
+import { PLUGIN_DEVELOPMENT_DIRECTORY } from './constants.js';
 
 export const getSassPlugin = (): Plugin => {
   const pluginName = 'esbuild-plugin-sass';
@@ -29,10 +29,7 @@ export const getSassPlugin = (): Plugin => {
             pluginName,
             errors: [
               {
-                text:
-                  error instanceof Error
-                    ? error.message
-                    : JSON.stringify(error),
+                text: error instanceof Error ? error.message : JSON.stringify(error),
                 pluginName,
                 location: { file: args.path, namespace: pluginName },
               },

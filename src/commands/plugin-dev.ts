@@ -5,28 +5,21 @@ import { createServer } from 'https';
 import path from 'path';
 import {
   DEFAULT_PORT,
-  DEVELOPMENT_DIRECTORY,
-  WORKSPACE_DIRECTORY,
+  PLUGIN_DEVELOPMENT_DIRECTORY,
+  PLUGIN_WORKSPACE_DIRECTORY,
 } from '../lib/constants.js';
 import fs from 'fs-extra';
 import { outputManifest } from '../lib/plugin-manifest.js';
 import { copyPluginContents } from '../lib/plugin-contents.js';
 import chokider from 'chokidar';
-import {
-  getContentsZipBuffer,
-  getZipFileNameSuffix,
-  outputContentsZip,
-} from '../lib/zip.js';
+import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '../lib/zip.js';
 import packer from '@kintone/plugin-packer';
 import { uploadZip } from '../lib/utils.js';
 import base from './dev-base.js';
 import { BuildOptions } from 'esbuild';
 
 export default function command() {
-  program
-    .command('dev')
-    .description('Start development server.')
-    .action(action);
+  program.command('dev').description('Start development server.').action(action);
 }
 
 export async function action() {
@@ -86,7 +79,7 @@ export async function action() {
     await outputContentsZip(manifest);
     const buffer = await getContentsZipBuffer();
     const pluginPrivateKey = await fs.readFile(
-      path.join(WORKSPACE_DIRECTORY, 'private.ppk'),
+      path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk'),
       'utf8'
     );
 
@@ -94,28 +87,23 @@ export async function action() {
 
     const zipFileName = `plugin${getZipFileNameSuffix('dev')}.zip`;
 
-    await fs.writeFile(
-      path.join(WORKSPACE_DIRECTORY, zipFileName),
-      output.plugin
-    );
+    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
     uploadZip('dev').then(({ stdout, stderr }) => {
       console.log(stdout);
       console.error(stderr);
     });
 
-    const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map(
-      (dir) => ({
-        in: path.join('src', dir, 'index.ts'),
-        out: dir,
-      })
-    );
+    const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map((dir) => ({
+      in: path.join('src', dir, 'index.ts'),
+      out: dir,
+    }));
 
     base({
       port,
       entryPoints,
-      certDir: WORKSPACE_DIRECTORY,
-      staticDir: DEVELOPMENT_DIRECTORY,
+      certDir: PLUGIN_WORKSPACE_DIRECTORY,
+      staticDir: PLUGIN_DEVELOPMENT_DIRECTORY,
     });
   } catch (error) {
     throw error;

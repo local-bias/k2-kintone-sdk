@@ -3,13 +3,10 @@ import { createServer, build } from 'vite';
 import { importPluginConfig } from '../../lib/import.js';
 import { getViteConfig } from '../../lib/vite.js';
 import chokidar from 'chokidar';
-import { DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
+import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
 
 export default function command() {
-  program
-    .command('dev')
-    .description('Start development server.')
-    .action(action);
+  program.command('dev').description('Start development server.').action(action);
 }
 
 export async function action() {
@@ -43,7 +40,7 @@ export async function action() {
 
     const server = await createServer({
       ...viteConfig,
-      root: DEVELOPMENT_DIRECTORY,
+      root: PLUGIN_DEVELOPMENT_DIRECTORY,
     });
     await server.listen();
 

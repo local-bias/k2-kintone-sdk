@@ -1,12 +1,9 @@
-import { CONTENTS_DIRECTORY } from './constants.js';
+import { PLUGIN_CONTENTS_DIRECTORY } from './constants.js';
 import { importPluginConfig } from './import.js';
 import fs from 'fs-extra';
 import path from 'path';
 
-function merge(
-  src: Record<string, any>,
-  dst: Record<string, any>
-): Record<string, any> {
+function merge(src: Record<string, any>, dst: Record<string, any>): Record<string, any> {
   return Object.entries(src).reduce((acc, [key, value]) => {
     if (!dst[key]) {
       return { ...acc, [key]: value };
@@ -30,13 +27,10 @@ export const outputManifest = async (
 ): Promise<Plugin.Meta.Manifest> => {
   const config = options?.config || (await importPluginConfig());
 
-  const merged = merge(
-    config.manifest.base,
-    config.manifest[env] || {}
-  ) as Plugin.Meta.Manifest;
+  const merged = merge(config.manifest.base, config.manifest[env] || {}) as Plugin.Meta.Manifest;
 
-  await fs.mkdirs(CONTENTS_DIRECTORY);
-  await fs.writeJson(path.join(CONTENTS_DIRECTORY, 'manifest.json'), merged);
+  await fs.mkdirs(PLUGIN_CONTENTS_DIRECTORY);
+  await fs.writeJson(path.join(PLUGIN_CONTENTS_DIRECTORY, 'manifest.json'), merged);
 
   return merged;
 };
