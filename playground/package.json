@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "link": "npm link @konomi-app/kintone-plugin"
+    "link": "npm link @konomi-app/k2"
   },
   "keywords": [],
   "author": "",
