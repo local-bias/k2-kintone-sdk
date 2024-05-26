@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-import build from './commands/build/index.js';
+import build from './commands/plugin-build.js';
 import dev from './commands/plugin-dev.js';
 import genkey from './commands/plugin-genkey.js';
 import init from './commands/init/index.js';

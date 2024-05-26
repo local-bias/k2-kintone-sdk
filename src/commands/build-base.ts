@@ -1,8 +1,8 @@
 import { program } from 'commander';
 import { build } from 'vite';
-import { importPluginConfig } from '../../lib/import.js';
-import { getViteConfig } from '../../lib/vite.js';
-import { PLUGIN_CONTENTS_DIRECTORY } from '../../lib/constants.js';
+import { importPluginConfig } from '../lib/import.js';
+import { getViteConfig } from '../lib/vite.js';
+import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 
 export default function command() {
   program
