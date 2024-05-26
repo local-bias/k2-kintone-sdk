@@ -10,14 +10,18 @@ export default function command() {
     .command('dev')
     .description('Start development server.')
     .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
+    .option('-c, --certdir <certdir>', 'Certificate directory', WORKSPACE_DIRECTORY)
     .option('-p, --port <port>', 'Port number', DEFAULT_PORT.toString())
     .action(action);
 }
 
-export async function action(options: { outdir: string; port: string }) {
+export async function action(options: { outdir: string; certdir: string; port: string }) {
   const { outdir, port } = options;
   console.group('🍳 Start development server');
   try {
+    console.log(`📂 Output directory: ${outdir}`);
+    console.log(`🔑 Certificate directory: ${WORKSPACE_DIRECTORY}`);
+
     const srcDir = path.join('src', 'apps');
     const dirs = fs.readdirSync(srcDir);
 
@@ -33,7 +37,7 @@ export async function action(options: { outdir: string; port: string }) {
       []
     );
 
-    base({
+    await base({
       port: Number(port),
       entryPoints,
       certDir: WORKSPACE_DIRECTORY,
