@@ -92,6 +92,7 @@ export async function action() {
     uploadZip('dev').then(({ stdout, stderr }) => {
       console.log(stdout);
       console.error(stderr);
+      console.log('📤 Plugin uploaded');
     });
 
     const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map((dir) => ({
