@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/k2",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "kintone sdk",
   "main": "./dist/index.js",
   "type": "module",
@@ -36,20 +36,20 @@
     "express": "^4",
     "fs-extra": "^11",
     "html-minifier": "^4",
-    "mini-css-extract-plugin": "^2.9.0",
+    "mini-css-extract-plugin": "^2",
     "sass": "^1",
-    "sass-loader": "^14.2.1",
-    "style-loader": "^4.0.0",
-    "terser-webpack-plugin": "^5.3.10",
-    "ts-loader": "^9.5.1",
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "sass-loader": "^14",
+    "style-loader": "^4",
+    "terser-webpack-plugin": "^5",
+    "ts-loader": "^9",
+    "tsconfig-paths-webpack-plugin": "^4",
     "vite": "^5",
     "vite-tsconfig-paths": "^4",
-    "webpack": "^5.91.0"
+    "webpack": "^5"
   },
   "devDependencies": {
     "@types/archiver": "*",
-    "@types/express": "^4.17.21",
+    "@types/express": "^4",
     "@types/fs-extra": "*",
     "@types/html-minifier": "^4",
     "typescript": "*"
