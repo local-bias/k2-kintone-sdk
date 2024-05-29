@@ -1,8 +1,9 @@
 import { program } from 'commander';
-import { importPluginConfig } from '../lib/import.js';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { buildWithWebpack } from '../lib/webpack.js';
 import path from 'path';
+import { Configuration } from 'webpack';
+import base from './build-base.js';
 
 export default function command() {
   program
@@ -13,12 +14,14 @@ export default function command() {
 
 export async function action() {
   console.group('🍳 Build the project for production');
+
   try {
-    await buildWithWebpack({
-      mode: 'plugin',
-      srcRoot: path.resolve('src'),
-      distRoot: PLUGIN_CONTENTS_DIRECTORY,
-    });
+    const entries: Configuration['entry'] = {
+      desktop: path.join('src', 'desktop', 'index.ts'),
+      config: path.join('src', 'config', 'index.ts'),
+    };
+
+    await base({ entries, outDir: PLUGIN_CONTENTS_DIRECTORY });
     console.log('✨ Build success.');
   } catch (error) {
     throw error;

@@ -1,39 +1,16 @@
-import { existsSync, readdirSync } from 'fs';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import path from 'path';
 import { cwd } from 'process';
 import TerserPlugin from 'terser-webpack-plugin';
-import webpack from 'webpack';
+import webpack, { Configuration } from 'webpack';
 import chalk from 'chalk';
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin';
 
 export const buildWithWebpack = async (props: {
-  mode: 'app' | 'plugin';
-  srcRoot: string;
-  distRoot: string;
+  entries: Configuration['entry'];
+  outDir: string;
 }) => {
-  const { mode, srcRoot, distRoot } = props;
-
-  /** @type { Record<string, string> } */
-  let entry = {};
-  if (mode === 'app') {
-    const appsRoot = path.join(srcRoot, 'apps');
-    const allProjects = readdirSync(appsRoot);
-
-    entry = allProjects.reduce((acc, dir) => {
-      for (const filename of ['index.ts', 'index.js', 'index.mjs']) {
-        if (existsSync(path.join(appsRoot, dir, filename))) {
-          return { ...acc, [dir]: path.join(appsRoot, dir, filename) };
-        }
-      }
-      return acc;
-    }, {});
-  } else {
-    entry = {
-      desktop: path.join(srcRoot, 'desktop', 'index.ts'),
-      config: path.join(srcRoot, 'config', 'index.ts'),
-    };
-  }
+  const { entries, outDir } = props;
 
   const exclude = /node_modules/;
   const styleLoader = MiniCssExtractPlugin.loader;
@@ -43,7 +20,7 @@ export const buildWithWebpack = async (props: {
       {
         mode: 'production',
         target: ['web', 'es2023'],
-        entry,
+        entry: entries,
         resolve: {
           extensions: ['.ts', '.tsx', '.js', '.json'],
           fallback: {
@@ -52,10 +29,7 @@ export const buildWithWebpack = async (props: {
           plugins: [new TsconfigPathsPlugin({ configFile: path.join(cwd(), 'tsconfig.json') })],
         },
         cache: { type: 'filesystem' },
-        output: {
-          filename: '[name].js',
-          path: path.resolve(cwd(), ...distRoot.split(/[\\\/]/g)),
-        },
+        output: { filename: '[name].js', path: outDir },
         module: {
           rules: [
             { test: /\.tsx?$/, exclude, loader: 'ts-loader' },
@@ -83,7 +57,7 @@ export const buildWithWebpack = async (props: {
           if (stats?.compilation.errors.length) {
             reject(
               [
-                chalk.red('⚠ 本番用ビルドでエラーが発生しました'),
+                chalk.red('⚠ Build failed.'),
                 ...stats.compilation.errors.map((error) => error.message),
               ].join('\n')
             );
