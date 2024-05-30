@@ -1,8 +1,8 @@
 import { program } from 'commander';
 import { build } from 'vite';
-import { importPluginConfig } from '../lib/import.js';
 import { getViteConfig } from '../lib/vite.js';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
+import path from 'path';
 
 export default function command() {
   program
@@ -14,9 +14,21 @@ export default function command() {
 export async function action() {
   console.group('🍳 Build the project for production');
   try {
-    const config = await importPluginConfig();
-
-    const viteConfig = getViteConfig(config);
+    const viteConfig = getViteConfig({
+      build: {
+        rollupOptions: {
+          input: {
+            config: path.join('src', 'config', 'index.ts'),
+            desktop: path.join('src', 'desktop', 'index.ts'),
+          },
+          output: {
+            entryFileNames: '[name].js',
+            chunkFileNames: '[name].js',
+            assetFileNames: '[name].[ext]',
+          },
+        },
+      },
+    });
 
     await build({
       ...viteConfig,

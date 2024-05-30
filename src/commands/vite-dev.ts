@@ -1,9 +1,12 @@
 import { program } from 'commander';
 import { createServer, build } from 'vite';
-import { importPluginConfig } from '../../lib/import.js';
-import { getViteConfig } from '../../lib/vite.js';
+import { importPluginConfig } from '../lib/import.js';
+import { getViteConfig } from '../lib/vite.js';
 import chokidar from 'chokidar';
-import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
+import { PLUGIN_DEVELOPMENT_DIRECTORY, PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
+import path from 'path';
+import { DEFAULT_PORT } from '../lib/constants.js';
+import fs from 'fs-extra';
 
 export default function command() {
   program.command('dev').description('Start development server.').action(action);
@@ -19,7 +22,28 @@ export async function action() {
       persistent: true,
     });
 
-    const viteConfig = getViteConfig(config);
+    const viteConfig = getViteConfig({
+      build: {
+        rollupOptions: {
+          input: {
+            config: path.join('src', 'config', 'index.ts'),
+            desktop: path.join('src', 'desktop', 'index.ts'),
+          },
+          output: {
+            entryFileNames: '[name].js',
+            chunkFileNames: '[name].js',
+            assetFileNames: '[name].[ext]',
+          },
+        },
+      },
+      server: {
+        port: config.server?.port ?? DEFAULT_PORT,
+        https: {
+          key: fs.readFileSync(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'localhost-key.pem')),
+          cert: fs.readFileSync(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'localhost-cert.pem')),
+        },
+      },
+    });
 
     const listener = async () =>
       build({
