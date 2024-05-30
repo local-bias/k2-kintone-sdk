@@ -29,7 +29,7 @@ export const buildWithWebpack = async (props: {
           plugins: [new TsconfigPathsPlugin({ configFile: path.join(cwd(), 'tsconfig.json') })],
         },
         cache: { type: 'filesystem' },
-        output: { filename: '[name].js', path: outDir },
+        output: { filename: '[name].js', path: path.resolve(outDir) },
         module: {
           rules: [
             { test: /\.tsx?$/, exclude, loader: 'ts-loader' },
