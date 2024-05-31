@@ -1,1 +1,1 @@
-console.log('app 2');
+import './feature1';
