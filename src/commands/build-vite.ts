@@ -7,7 +7,7 @@ import fs from 'fs-extra';
 
 export default function command() {
   program
-    .command('build')
+    .command('vite-build')
     .option('-o, --outdir <outdir>', 'Output directory.', path.join(WORKSPACE_DIRECTORY, 'prod'))
     .option('-i, --input <input>', 'Input directory.', path.join('src', 'apps'))
     .description("Build the project for production. (It's a wrapper of webpack build command.)")
