@@ -1,6 +1,5 @@
 import { program } from 'commander';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
-import { buildWithWebpack } from '../lib/webpack.js';
 import path from 'path';
 import { Configuration } from 'webpack';
 import base from './build-base.js';

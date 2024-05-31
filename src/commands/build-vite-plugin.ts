@@ -1,8 +1,8 @@
 import { program } from 'commander';
-import { build } from 'vite';
 import { getViteConfig } from '../lib/vite.js';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import path from 'path';
+import base from './build-vite-base.js';
 
 export default function command() {
   program
@@ -27,14 +27,11 @@ export async function action() {
             assetFileNames: '[name].[ext]',
           },
         },
+        outDir: PLUGIN_CONTENTS_DIRECTORY,
       },
     });
 
-    await build({
-      ...viteConfig,
-      mode: 'production',
-      build: { ...viteConfig.build, outDir: PLUGIN_CONTENTS_DIRECTORY },
-    });
+    await base({ viteConfig });
 
     console.log('✨ Build success.');
   } catch (error) {

@@ -1,7 +1,5 @@
 import { program } from 'commander';
 import { importPluginConfig } from '../lib/import.js';
-import express from 'express';
-import { createServer } from 'https';
 import path from 'path';
 import {
   DEFAULT_PORT,

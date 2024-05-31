@@ -1,28 +1,28 @@
 import { program } from 'commander';
-import { createServer, build } from 'vite';
-import { importPluginConfig } from '../lib/import.js';
 import { getViteConfig } from '../lib/vite.js';
-import chokidar from 'chokidar';
-import { PLUGIN_DEVELOPMENT_DIRECTORY, PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
+import { DEVELOPMENT_DIRECTORY, WORKSPACE_DIRECTORY } from '../lib/constants.js';
 import path from 'path';
 import { DEFAULT_PORT } from '../lib/constants.js';
 import fs from 'fs-extra';
+import base from './dev-vite-base.js';
 
 export default function command() {
-  program.command('dev').description('Start development server.').action(action);
+  program
+    .command('vite-dev')
+    .description('Start development server.')
+    .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
+    .option('-c, --certdir <certdir>', 'Certificate directory', WORKSPACE_DIRECTORY)
+    .option('-p, --port <port>', 'Port number', DEFAULT_PORT.toString())
+    .action(action);
 }
 
-export async function action() {
+export async function action(options: { certdir: string; outdir: string; port: string }) {
   console.group('🚀 Start development server');
   try {
-    const config = await importPluginConfig();
-
-    const watcher = chokidar.watch(['src/**/*.{ts,js,jsx,tsx}'], {
-      ignored: /node_modules/,
-      persistent: true,
-    });
+    const { certdir, outdir, port } = options;
 
     const viteConfig = getViteConfig({
+      mode: 'development',
       build: {
         rollupOptions: {
           input: {
@@ -35,40 +35,20 @@ export async function action() {
             assetFileNames: '[name].[ext]',
           },
         },
+        outDir: path.resolve(outdir),
+        sourcemap: 'inline',
+        chunkSizeWarningLimit: 8192,
       },
       server: {
-        port: config.server?.port ?? DEFAULT_PORT,
+        port: Number(port),
         https: {
-          key: fs.readFileSync(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'localhost-key.pem')),
-          cert: fs.readFileSync(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'localhost-cert.pem')),
+          key: fs.readFileSync(path.join(certdir, 'localhost-key.pem')),
+          cert: fs.readFileSync(path.join(certdir, 'localhost-cert.pem')),
         },
       },
     });
 
-    const listener = async () =>
-      build({
-        ...viteConfig,
-        mode: 'development',
-        build: {
-          ...viteConfig.build,
-          sourcemap: 'inline',
-          chunkSizeWarningLimit: 8192,
-        },
-      });
-
-    await listener();
-
-    watcher.on('change', listener);
-    watcher.on('add', listener);
-    watcher.on('unlink', listener);
-
-    const server = await createServer({
-      ...viteConfig,
-      root: PLUGIN_DEVELOPMENT_DIRECTORY,
-    });
-    await server.listen();
-
-    server.printUrls();
+    await base({ viteConfig });
   } catch (error) {
     throw error;
   } finally {
