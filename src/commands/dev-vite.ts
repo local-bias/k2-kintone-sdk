@@ -10,25 +10,40 @@ export default function command() {
   program
     .command('vite-dev')
     .description('Start development server.')
+    .option('-i, --input <input>', 'Input directory', 'src/apps')
     .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
     .option('-c, --certdir <certdir>', 'Certificate directory', WORKSPACE_DIRECTORY)
     .option('-p, --port <port>', 'Port number', DEFAULT_PORT.toString())
     .action(action);
 }
 
-export async function action(options: { certdir: string; outdir: string; port: string }) {
+export async function action(options: {
+  certdir: string;
+  outdir: string;
+  port: string;
+  srcdir: string;
+}) {
   console.group('🚀 Start development server');
   try {
-    const { certdir, outdir, port } = options;
+    const { certdir, outdir, port, srcdir } = options;
+
+    const srcDir = path.resolve(srcdir);
+    const dirs = fs.readdirSync(srcDir);
+
+    const entryPoints = dirs.reduce<Record<string, string>>((acc, dir) => {
+      for (const filename of ['index.ts', 'index.js', 'index.mjs']) {
+        if (fs.existsSync(path.join(srcDir, dir, filename))) {
+          return { ...acc, [dir]: path.join(srcDir, dir, filename) };
+        }
+      }
+      return acc;
+    }, {});
 
     const viteConfig = getViteConfig({
       mode: 'development',
       build: {
         rollupOptions: {
-          input: {
-            config: path.join('src', 'config', 'index.ts'),
-            desktop: path.join('src', 'desktop', 'index.ts'),
-          },
+          input: entryPoints,
           output: {
             entryFileNames: '[name].js',
             chunkFileNames: '[name].js',
