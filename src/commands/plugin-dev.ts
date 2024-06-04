@@ -13,7 +13,7 @@ import chokider from 'chokidar';
 import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '../lib/zip.js';
 import packer from '@kintone/plugin-packer';
 import { uploadZip } from '../lib/utils.js';
-import base from './dev-base.js';
+import base from './dev-base-esbuild.js';
 import { BuildOptions } from 'esbuild';
 
 export default function command() {

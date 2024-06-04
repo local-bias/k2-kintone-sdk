@@ -1,9 +1,7 @@
 import chalk from 'chalk';
 import esbuild, { Plugin, type BuildOptions } from 'esbuild';
-import path from 'path';
 import { compile } from 'sass';
 import { resolve } from 'path';
-import { PLUGIN_DEVELOPMENT_DIRECTORY } from './constants.js';
 
 export const getSassPlugin = (): Plugin => {
   const pluginName = 'esbuild-plugin-sass';
@@ -41,17 +39,10 @@ export const getSassPlugin = (): Plugin => {
   };
 };
 
-export const buildWithEsbuild = async (params: {
-  entryPoints: BuildOptions['entryPoints'];
-  outdir: string;
-}) => {
-  const { entryPoints, outdir } = params;
-  const context = await esbuild.context({
-    entryPoints,
+export const getEsbuildContext = async (params: BuildOptions) => {
+  return esbuild.context({
     bundle: true,
-    sourcemap: 'inline',
     platform: 'browser',
-    outdir,
     plugins: [
       {
         name: 'on-end',
@@ -66,7 +57,11 @@ export const buildWithEsbuild = async (params: {
       },
       getSassPlugin(),
     ],
+    ...params,
   });
+};
 
+export const buildWithEsbuild = async (params: BuildOptions) => {
+  const context = await getEsbuildContext(params);
   context.watch();
 };

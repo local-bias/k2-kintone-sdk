@@ -3,7 +3,7 @@ import { BuildOptions } from 'esbuild';
 import fs from 'fs-extra';
 import path from 'path';
 import { DEFAULT_PORT, DEVELOPMENT_DIRECTORY, WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import base from './dev-base.js';
+import base from './dev-base-esbuild.js';
 
 export default function command() {
   program
