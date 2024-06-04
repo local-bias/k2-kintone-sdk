@@ -18,6 +18,7 @@ export default async function action(params: {
       port,
       keyfile: path.join(certDir, 'localhost-key.pem'),
       certfile: path.join(certDir, 'localhost-cert.pem'),
+      servedir: outdir,
     }),
   ]);
 
