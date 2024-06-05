@@ -17,12 +17,21 @@ import base from './dev-base-esbuild.js';
 import { BuildOptions } from 'esbuild';
 
 export default function command() {
-  program.command('dev').description('Start development server.').action(action);
+  program
+    .command('dev')
+    .option(
+      '-p, --ppk <ppk>',
+      '.ppk file path',
+      path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk')
+    )
+    .description('Start development server.')
+    .action(action);
 }
 
-export async function action() {
+export async function action(options: { ppk: string }) {
   console.group('🍳 Start development server');
   try {
+    const { ppk: ppkPath } = options;
     const config = await importPluginConfig();
 
     const port = config.server?.port ?? DEFAULT_PORT;
@@ -76,10 +85,7 @@ export async function action() {
 
     await outputContentsZip(manifest);
     const buffer = await getContentsZipBuffer();
-    const pluginPrivateKey = await fs.readFile(
-      path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk'),
-      'utf8'
-    );
+    const pluginPrivateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
 
     const output = await packer(buffer, pluginPrivateKey);
 
