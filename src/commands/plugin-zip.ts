@@ -13,13 +13,18 @@ export default function command(): void {
     .command('zip')
     .description('generate plugin zip')
     .option('-e, --env <env>', 'plugin environment (dev, prod, standalone)', 'prod')
+    .option(
+      '-p, --ppk <ppk>',
+      '.ppk file path',
+      path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk')
+    )
     .action(action);
 }
 
-async function action(options: { env: string }): Promise<void> {
+async function action(options: { env: string; ppk: string }): Promise<void> {
   console.group('🍳 Executing plugin zip generation');
   try {
-    const { env } = options;
+    const { env, ppk: ppkPath } = options;
     if (!isEnv(env)) {
       throw new Error('Invalid environment');
     }
@@ -32,10 +37,7 @@ async function action(options: { env: string }): Promise<void> {
 
     await outputContentsZip(manifest);
     const buffer = await getContentsZipBuffer();
-    const privateKey = await fs.readFile(
-      path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk'),
-      'utf8'
-    );
+    const privateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
 
     const output = await packer(buffer, privateKey);
 
