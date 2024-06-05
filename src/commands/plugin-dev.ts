@@ -87,6 +87,7 @@ export async function action() {
 
     await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
+    console.log(`📤 uploading ${zipFileName} to your kintone`);
     uploadZip('dev').then(({ stdout, stderr }) => {
       console.log(stdout);
       console.error(stderr);
