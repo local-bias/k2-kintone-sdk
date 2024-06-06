@@ -3,7 +3,7 @@ import { program } from 'commander';
 import build from './commands/plugin-build.js';
 import dev from './commands/plugin-dev.js';
 import genkey from './commands/plugin-genkey.js';
-import init from './commands/init/index.js';
+import init from './commands/plugin-init.js';
 import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
 import upload from './commands/upload/index.js';

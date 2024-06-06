@@ -2,10 +2,10 @@ import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
 import packer from '@kintone/plugin-packer';
-import { outputManifest } from '../../lib/plugin-manifest.js';
-import { PLUGIN_WORKSPACE_DIRECTORY } from '../../lib/constants.js';
-import { getContentsZipBuffer, outputContentsZip } from '../../lib/zip.js';
-import { copyPluginContents } from '../../lib/plugin-contents.js';
+import { outputManifest } from '../lib/plugin-manifest.js';
+import { PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
+import { getContentsZipBuffer, outputContentsZip } from '../lib/zip.js';
+import { copyPluginContents } from '../lib/plugin-contents.js';
 
 export default function command() {
   program.command('init').description('generate private.ppk and kitting config').action(action);
@@ -33,9 +33,9 @@ export async function action() {
 
     if (!privateKey) {
       await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk'), output.privateKey);
-      console.log('🔐 private.ppk generated');
+      console.log('🔑 private.ppk generated');
     } else {
-      console.log('🔐 private.ppk already exists. The existing private.ppk will be used.');
+      console.log('🔑 private.ppk already exists. The existing private.ppk will be used.');
     }
     await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'plugin.zip'), output.plugin);
     console.log('📦 plugin.zip generated');
