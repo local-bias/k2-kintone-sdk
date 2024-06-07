@@ -49,9 +49,9 @@ export const getEsbuildContext = async (params: BuildOptions) => {
         setup: ({ onEnd }) =>
           onEnd(() =>
             console.log(
-              chalk.hex('#d1d5db')(`${new Date().toLocaleTimeString()} `) +
-                chalk.cyan(`[content] `) +
-                `Compiled successfully.`
+              chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+                chalk.cyan(`[js] `) +
+                `rebuilt`
             )
           ),
       },

@@ -35,26 +35,24 @@ export async function action(options: { ppk: string }) {
     const manifest = await getManifest({ config, port });
     console.log(`📝 manifest.json generated`);
 
-    Promise.all([
-      watchContentsAndUploadZip({ manifest, ppkPath }),
-      watchCss(config),
-      async () => {
-        const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map((dir) => ({
-          in: path.join('src', dir, 'index.ts'),
-          out: dir,
-        }));
-
-        base({
-          port,
-          entryPoints,
-          certDir: PLUGIN_WORKSPACE_DIRECTORY,
-          staticDir: PLUGIN_DEVELOPMENT_DIRECTORY,
-        });
-      },
-    ]);
+    Promise.all([watchContentsAndUploadZip({ manifest, ppkPath }), watchCss(config), build(port)]);
   } catch (error) {
     throw error;
   } finally {
     console.groupEnd();
   }
+}
+
+async function build(port: number) {
+  const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map((dir) => ({
+    in: path.join('src', dir, 'index.ts'),
+    out: dir,
+  }));
+
+  base({
+    port,
+    entryPoints,
+    certDir: PLUGIN_WORKSPACE_DIRECTORY,
+    staticDir: PLUGIN_DEVELOPMENT_DIRECTORY,
+  });
 }

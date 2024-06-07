@@ -6,18 +6,30 @@ import path from 'path';
 import { PLUGIN_WORKSPACE_DIRECTORY } from '../../lib/constants.js';
 import { uploadZip } from '../../lib/utils.js';
 import chokider from 'chokidar';
+import chalk from 'chalk';
 
 export const watchContentsAndUploadZip = async (params: {
   manifest: Plugin.Meta.Manifest;
   ppkPath: string;
 }) => {
   const { manifest, ppkPath } = params;
+
+  let initialScanComplete = false;
+
   const contentsListener = async () => {
     try {
+      if (!initialScanComplete) {
+        return;
+      }
       await copyPluginContents();
-      console.log('📁 contents updated');
+      console.log(
+        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+          chalk.cyan(`[contents] `) +
+          `updated`
+      );
     } catch (error: any) {
-      console.error(`📁 contents update failed. ${error?.message}`);
+      console.error('Error copying plugin contents:', error);
+      return;
     }
 
     await outputContentsZip(manifest);
@@ -30,15 +42,25 @@ export const watchContentsAndUploadZip = async (params: {
 
     await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
+    console.log(
+      chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+        chalk.cyan(`[upload] `) +
+        `start uploading`
+    );
     await uploadZip('dev');
-    console.log('📤 plugin uploaded');
+    console.log(
+      chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) + chalk.cyan(`[upload] `) + `done`
+    );
   };
-
-  await contentsListener();
 
   const contentsWatcher = chokider.watch(['src/contents/**/*'], {
     ignored: /node_modules/,
     persistent: true,
+  });
+
+  contentsWatcher.on('ready', () => {
+    initialScanComplete = true;
+    contentsListener();
   });
 
   contentsWatcher.on('change', contentsListener);

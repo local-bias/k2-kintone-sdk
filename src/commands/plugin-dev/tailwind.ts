@@ -5,6 +5,7 @@ import tailwindcss, { type Config as TailwindConfig } from 'tailwindcss';
 import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
 import { esmImport } from '../../lib/import.js';
 import chokidar from 'chokidar';
+import chalk from 'chalk';
 
 async function buildTailwindCSS(params: {
   inputFile: string;
@@ -18,12 +19,25 @@ async function buildTailwindCSS(params: {
   const css = await fs.readFile(inputPath, 'utf8');
 
   const watcher = chokidar.watch(
-    (config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}'],
-    { ignored: /node_modules/, persistent: true }
+    [...((config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}']), inputPath],
+    {
+      ignored: /node_modules/,
+      persistent: true,
+      awaitWriteFinish: {
+        stabilityThreshold: 2000,
+        pollInterval: 100,
+      },
+    }
   );
 
-  const listener = async () => {
+  let initialScanComplete = false;
+
+  const listener = async (type: string, path?: string) => {
     try {
+      if (type === 'add' && !initialScanComplete) {
+        return;
+      }
+
       const result = await postcss([tailwindcss(config)]).process(css, {
         from: inputPath,
         to: outputPath,
@@ -34,17 +48,27 @@ async function buildTailwindCSS(params: {
       if (result.map) {
         await fs.writeFile(`${outputPath}.map`, result.map.toString());
       }
-      console.log(`🎨 Successfully built Tailwind CSS to ${outputPath}`);
+
+      console.log(
+        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+          chalk.cyan(`[css] `) +
+          outputFileName +
+          (type === 'init' ? ' init' : ` rebuilt`)
+      );
     } catch (error) {
       console.error('Error building Tailwind CSS:', error);
     }
   };
 
-  await listener();
+  await listener('init');
 
-  watcher.on('change', listener);
-  watcher.on('add', listener);
-  watcher.on('unlink', listener);
+  watcher.on('ready', () => {
+    initialScanComplete = true;
+  });
+
+  watcher.on('change', (path) => listener('change', path));
+  watcher.on('add', (path) => listener('add', path));
+  watcher.on('unlink', () => listener('unlink'));
 }
 
 export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
@@ -57,8 +81,8 @@ export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
   const configPathForDesktop = typeof configPath === 'string' ? configPath : configPath.desktop;
   const configPathForConfig = typeof configPath === 'string' ? configPath : configPath.config;
 
-  const desktopConfig = await esmImport(path.resolve(configPathForDesktop));
-  const configConfig = await esmImport(path.resolve(configPathForConfig));
+  const desktopConfig = (await esmImport(path.resolve(configPathForDesktop))).default;
+  const configConfig = (await esmImport(path.resolve(configPathForConfig))).default;
 
   const inputFile = path.resolve(css);
 
