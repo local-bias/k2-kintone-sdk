@@ -31,7 +31,6 @@ KINTONE_PASSWORD
   if (KINTONE_BASIC_AUTH_USERNAME && KINTONE_BASIC_AUTH_PASSWORD) {
     command += ` --basic-auth-username ${KINTONE_BASIC_AUTH_USERNAME} --basic-auth-password ${KINTONE_BASIC_AUTH_PASSWORD}`;
   }
-  command += ' --watch --waiting-dialog-ms 3000';
 
   return exec(command);
 };
