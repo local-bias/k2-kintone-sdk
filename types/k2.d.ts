@@ -23,8 +23,6 @@ type Resources = {
 };
 
 declare namespace K2 {
-  type Env = 'dev' | 'prod' | 'standalone';
-
   /**
    * 公開しているプラグインテンプレートで使用する設定ファイル
    */
