@@ -16,8 +16,8 @@ export const watchContentsAndUploadZip = async (params: {
     try {
       await copyPluginContents();
       console.log('📁 contents updated');
-    } catch (error) {
-      console.error('📁 contents update failed');
+    } catch (error: any) {
+      console.error(`📁 contents update failed. ${error?.message}`);
     }
 
     await outputContentsZip(manifest);
@@ -30,9 +30,8 @@ export const watchContentsAndUploadZip = async (params: {
 
     await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
-    console.log(`📤 uploading ${zipFileName} to your kintone`);
     await uploadZip('dev');
-    console.log('📤 Plugin uploaded');
+    console.log('📤 plugin uploaded');
   };
 
   await contentsListener();
