@@ -9,7 +9,7 @@ import test from './commands/test/index.js';
 import upload from './commands/upload/index.js';
 import zip from './commands/plugin-zip.js';
 
-program.name('plugin').version('0.7.1').description('');
+program.name('plugin').version('0.8.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
 build();
 dev();

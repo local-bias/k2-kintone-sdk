@@ -1,11 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
-import postcss from 'postcss';
-import tailwindcss, { type Config as TailwindConfig } from 'tailwindcss';
+import { type Config as TailwindConfig } from 'tailwindcss';
 import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
-import { esmImport } from '../../lib/import.js';
 import chokidar from 'chokidar';
 import chalk from 'chalk';
+import { getTailwindConfig, outputCss } from '../../lib/tailwind.js';
 
 async function buildTailwindCSS(params: {
   inputFile: string;
@@ -38,16 +37,7 @@ async function buildTailwindCSS(params: {
         return;
       }
 
-      const result = await postcss([tailwindcss(config)]).process(css, {
-        from: inputPath,
-        to: outputPath,
-      });
-
-      await fs.writeFile(outputPath, result.css);
-
-      if (result.map) {
-        await fs.writeFile(`${outputPath}.map`, result.map.toString());
-      }
+      await outputCss({ css, inputPath, outputPath, config });
 
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
@@ -60,10 +50,9 @@ async function buildTailwindCSS(params: {
     }
   };
 
-  await listener('init');
-
-  watcher.on('ready', () => {
+  watcher.on('ready', async () => {
     initialScanComplete = true;
+    await listener('init');
   });
 
   watcher.on('change', (path) => listener('change', path));
@@ -76,18 +65,12 @@ export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
     return;
   }
 
-  const { css, config: configPath } = pluginConfig.tailwind;
+  const tailwindConfig = await getTailwindConfig(pluginConfig.tailwind);
 
-  const configPathForDesktop = typeof configPath === 'string' ? configPath : configPath.desktop;
-  const configPathForConfig = typeof configPath === 'string' ? configPath : configPath.config;
-
-  const desktopConfig = (await esmImport(path.resolve(configPathForDesktop))).default;
-  const configConfig = (await esmImport(path.resolve(configPathForConfig))).default;
-
-  const inputFile = path.resolve(css);
+  const inputFile = path.resolve(pluginConfig.tailwind.css);
 
   return Promise.all([
-    buildTailwindCSS({ inputFile, outputFileName: 'desktop.css', config: desktopConfig }),
-    buildTailwindCSS({ inputFile, outputFileName: 'config.css', config: configConfig }),
+    buildTailwindCSS({ inputFile, outputFileName: 'desktop.css', config: tailwindConfig.desktop }),
+    buildTailwindCSS({ inputFile, outputFileName: 'config.css', config: tailwindConfig.config }),
   ]);
 };

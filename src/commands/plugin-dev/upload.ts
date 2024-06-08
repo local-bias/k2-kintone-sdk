@@ -32,25 +32,35 @@ export const watchContentsAndUploadZip = async (params: {
       return;
     }
 
-    await outputContentsZip(manifest);
-    const buffer = await getContentsZipBuffer();
-    const pluginPrivateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
+    try {
+      await outputContentsZip(manifest);
+      const buffer = await getContentsZipBuffer();
+      const pluginPrivateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
 
-    const output = await packer(buffer, pluginPrivateKey);
+      const output = await packer(buffer, pluginPrivateKey);
 
-    const zipFileName = `plugin${getZipFileNameSuffix('dev')}.zip`;
+      const zipFileName = `plugin${getZipFileNameSuffix('dev')}.zip`;
 
-    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
+      await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
-    console.log(
-      chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
-        chalk.cyan(`[upload] `) +
-        `start uploading`
-    );
-    await uploadZip('dev');
-    console.log(
-      chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) + chalk.cyan(`[upload] `) + `done`
-    );
+      console.log(
+        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+          chalk.cyan(`[upload] `) +
+          `start uploading`
+      );
+      await uploadZip('dev');
+      console.log(
+        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+          chalk.cyan(`[upload] `) +
+          `done`
+      );
+    } catch (error: any) {
+      console.log(
+        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+          chalk.cyan(`[upload] `) +
+          chalk.red(`failed`)
+      );
+    }
   };
 
   const contentsWatcher = chokider.watch(['src/contents/**/*'], {
