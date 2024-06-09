@@ -9,8 +9,9 @@ import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
 import upload from './commands/upload/index.js';
 import zip from './commands/plugin-zip.js';
+import lint from './commands/lint.js';
 
-program.name('plugin').version('0.8.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
+program.name('plugin').version('0.9.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
 build();
 esbuild();
@@ -21,5 +22,6 @@ manifest();
 test();
 upload();
 zip();
+lint();
 
 program.parse(process.argv);

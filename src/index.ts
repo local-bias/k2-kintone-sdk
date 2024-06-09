@@ -6,8 +6,9 @@ import dev from './commands/dev.js';
 import viteDev from './commands/dev-vite.js';
 import genkey from './commands/genkey.js';
 import esbuildBuild from './commands/build-esbuild.js';
+import lint from './commands/lint.js';
 
-program.name('k2').version('0.8.0').description('k2 - 🍳 kintone kitchen 🍳');
+program.name('k2').version('0.9.0').description('k2 - 🍳 kintone kitchen 🍳');
 
 build();
 viteBuild();
@@ -15,5 +16,6 @@ esbuildBuild();
 dev();
 viteDev();
 genkey();
+lint();
 
 program.parse(process.argv);
