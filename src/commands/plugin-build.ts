@@ -23,6 +23,7 @@ export async function action() {
 
     if (config?.lint?.build) {
       await lint();
+      console.log('✨ Lint success.');
     }
 
     if (!fs.existsSync(PLUGIN_CONTENTS_DIRECTORY)) {
