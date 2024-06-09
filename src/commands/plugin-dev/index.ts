@@ -1,16 +1,17 @@
 import { program } from 'commander';
-import { importPluginConfig } from '../../lib/import.js';
+import { BuildOptions } from 'esbuild';
+import fs from 'fs-extra';
 import path from 'path';
 import {
   DEFAULT_PORT,
   PLUGIN_DEVELOPMENT_DIRECTORY,
   PLUGIN_WORKSPACE_DIRECTORY,
 } from '../../lib/constants.js';
+import { importPluginConfig } from '../../lib/import.js';
 import base from '../dev-base-esbuild.js';
-import { BuildOptions } from 'esbuild';
 import { getManifest } from './create-manifest.js';
-import { watchContentsAndUploadZip } from './upload.js';
 import { watchCss } from './tailwind.js';
+import { watchContentsAndUploadZip } from './upload.js';
 
 export default function command() {
   program
@@ -29,6 +30,10 @@ export async function action(options: { ppk: string }) {
   try {
     const { ppk: ppkPath } = options;
     const config = await importPluginConfig();
+
+    if (!fs.existsSync(PLUGIN_DEVELOPMENT_DIRECTORY)) {
+      await fs.mkdir(PLUGIN_DEVELOPMENT_DIRECTORY, { recursive: true });
+    }
 
     const port = config.server?.port ?? DEFAULT_PORT;
 
