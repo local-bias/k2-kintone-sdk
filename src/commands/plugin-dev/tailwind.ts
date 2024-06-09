@@ -15,8 +15,6 @@ async function buildTailwindCSS(params: {
   const inputPath = path.resolve(inputFile);
   const outputPath = path.join(PLUGIN_DEVELOPMENT_DIRECTORY, outputFileName);
 
-  const css = await fs.readFile(inputPath, 'utf8');
-
   const watcher = chokidar.watch(
     [...((config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}']), inputPath],
     {
@@ -37,7 +35,7 @@ async function buildTailwindCSS(params: {
         return;
       }
 
-      await outputCss({ css, inputPath, outputPath, config });
+      await outputCss({ inputPath, outputPath, config });
 
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +

@@ -5,11 +5,12 @@ import { Configuration } from 'webpack';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importPluginConfig } from '../lib/import.js';
 import { getTailwindConfig, outputCss } from '../lib/tailwind.js';
-import base from './build-base.js';
+import { BuildOptions } from 'esbuild';
+import { buildWithEsbuild } from '../lib/esbuild.js';
 
 export default function command() {
   program
-    .command('build')
+    .command('esbuild')
     .description("Build the project for production. (It's a wrapper of webpack build command.)")
     .action(action);
 }
@@ -49,7 +50,17 @@ export async function action() {
       console.log('✨ Built desktop.css');
     }
 
-    await base({ entries, outDir: PLUGIN_CONTENTS_DIRECTORY });
+    const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map((dir) => ({
+      in: path.join('src', dir, 'index.ts'),
+      out: dir,
+    }));
+
+    await buildWithEsbuild({
+      entryPoints,
+      outdir: PLUGIN_CONTENTS_DIRECTORY,
+      minify: true,
+      sourcemap: false,
+    });
     console.log('✨ Built desktop.js and config.js');
     console.log('✨ Build success.');
   } catch (error) {

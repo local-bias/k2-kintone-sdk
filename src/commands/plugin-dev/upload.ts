@@ -58,7 +58,8 @@ export const watchContentsAndUploadZip = async (params: {
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
           chalk.cyan(`[upload] `) +
-          chalk.red(`failed`)
+          chalk.red(`failed`) +
+          chalk.hex('#e5e7eb')(`: ${error?.message ?? 'Unknown error'}`)
       );
     }
   };

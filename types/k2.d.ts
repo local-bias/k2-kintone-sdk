@@ -32,5 +32,16 @@ declare namespace K2 {
       /** 0から65535までのポート番号 */
       port?: number;
     };
+
+    /**
+     * tailwindcssを使用している場合、設定ファイルのパスとCSSファイルのパスを指定することで、JavaScriptファイルのビルド時にCSSファイルを生成します
+     *
+     * @see {@link https://tailwindcss.com/docs/installation | Tailwind CSS}
+     */
+    tailwind?: {
+      config?: string;
+      /** CSSファイルのパス */
+      css?: string;
+    };
   };
 }

@@ -1,49 +1,21 @@
 import chalk from 'chalk';
-import esbuild, { Plugin, type BuildOptions } from 'esbuild';
-import { compile } from 'sass';
-import { resolve } from 'path';
+import esbuild, { type BuildOptions } from 'esbuild';
+import { getSassPlugin } from './esbuild-sass-plugin.js';
 
-export const getSassPlugin = (): Plugin => {
-  const pluginName = 'esbuild-plugin-sass';
-
+const completeBuildOptions = (params: BuildOptions): BuildOptions => {
   return {
-    name: pluginName,
-    setup(build) {
-      build.onResolve({ filter: /\.s[ac]ss$/ }, (args) => ({
-        path: resolve(args.resolveDir, args.path),
-        namespace: pluginName,
-      }));
-
-      build.onLoad({ filter: /.*/, namespace: pluginName }, async (args) => {
-        try {
-          const result = compile(args.path);
-          return {
-            contents: result.css,
-            loader: 'css',
-            watchFiles: [args.path],
-          };
-        } catch (error) {
-          return {
-            pluginName,
-            errors: [
-              {
-                text: error instanceof Error ? error.message : JSON.stringify(error),
-                pluginName,
-                location: { file: args.path, namespace: pluginName },
-              },
-            ],
-          };
-        }
-      });
-    },
+    bundle: true,
+    platform: 'browser',
+    ...params,
+    plugins: [...(params.plugins ?? []), getSassPlugin()],
   };
 };
 
-export const getEsbuildContext = async (params: BuildOptions) => {
-  return esbuild.context({
-    bundle: true,
-    platform: 'browser',
+const completeDevBuildOptions = (params: BuildOptions): BuildOptions => {
+  return completeBuildOptions({
+    ...params,
     plugins: [
+      ...(params.plugins ?? []),
       {
         name: 'on-end',
         setup: ({ onEnd }) =>
@@ -55,13 +27,21 @@ export const getEsbuildContext = async (params: BuildOptions) => {
             )
           ),
       },
-      getSassPlugin(),
     ],
-    ...params,
   });
 };
 
-export const buildWithEsbuild = async (params: BuildOptions) => {
-  const context = await getEsbuildContext(params);
-  context.watch();
+export const getEsbuildContext = async (params: BuildOptions) => {
+  return esbuild.context(completeDevBuildOptions(params));
+};
+
+export const buildWithEsbuild = async (params: BuildOptions & { watch?: boolean }) => {
+  const { watch = false, ...rest } = params;
+  if (watch) {
+    const context = await getEsbuildContext(rest);
+    context.watch();
+  } else {
+    const options = completeBuildOptions(rest);
+    await esbuild.build(options);
+  }
 };

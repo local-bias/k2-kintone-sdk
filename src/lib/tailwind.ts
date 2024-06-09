@@ -26,13 +26,14 @@ export const getTailwindConfig = async (
 };
 
 export const outputCss = async (params: {
-  css: string;
   inputPath: string;
   outputPath: string;
   config: TailwindConfig;
   minify?: boolean;
 }) => {
-  const { inputPath, outputPath, config, css, minify = false } = params;
+  const { inputPath, outputPath, config, minify = false } = params;
+
+  const css = await fs.readFile(inputPath, 'utf8');
 
   const result = await postcss([tailwindcss(config), ...(minify ? [cssnanoPlugin()] : [])]).process(
     css,

@@ -18,7 +18,7 @@ export default function action(params: {
 
 async function build(params: { entryPoints: BuildOptions['entryPoints']; staticDir: string }) {
   const { entryPoints, staticDir: outdir } = params;
-  return buildWithEsbuild({ entryPoints, outdir });
+  return buildWithEsbuild({ entryPoints, outdir, watch: true });
 }
 
 async function server(params: { port: number; certDir: string; staticDir: string }) {
