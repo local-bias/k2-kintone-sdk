@@ -1,6 +1,7 @@
 import archiver from 'archiver';
 import fs from 'fs-extra';
 import path from 'path';
+import invariant from 'tiny-invariant';
 import { PLUGIN_CONTENTS_DIRECTORY, PLUGIN_WORKSPACE_DIRECTORY } from './constants.js';
 
 export const outputContentsZip = async (manifest: Plugin.Meta.Manifest) => {
@@ -13,17 +14,13 @@ export const outputContentsZip = async (manifest: Plugin.Meta.Manifest) => {
     return !/^https?:\/\//.test(file);
   };
 
-  archive.file(path.join(PLUGIN_CONTENTS_DIRECTORY, 'manifest.json'), {
-    name: 'manifest.json',
-  });
-  if (!manifest.config) {
-    throw new Error('manifest.config is required');
-  }
+  invariant(manifest.config?.html, 'manifest.config.html is required');
 
   const targetFiles = [
+    'manifest.json',
     ...new Set([
       manifest.icon,
-      manifest.config.html!,
+      manifest.config.html,
       ...(manifest.desktop?.js || []).filter(filterLocalContent),
       ...(manifest.desktop?.css || []).filter(filterLocalContent),
       ...(manifest.mobile?.js || []).filter(filterLocalContent),
