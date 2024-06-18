@@ -2,7 +2,7 @@ import path from 'path';
 import { type Config as TailwindConfig } from 'tailwindcss';
 import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
 import chalk from 'chalk';
-import { getTailwindConfig, watchTailwindCSS } from '../../lib/tailwind.js';
+import { getTailwindConfigFromK2Config, watchTailwindCSS } from '../../lib/tailwind.js';
 
 async function buildTailwindCSS(params: {
   inputFile: string;
@@ -17,7 +17,7 @@ async function buildTailwindCSS(params: {
     input: inputPath,
     output: outputPath,
     config,
-    onChanges: ({ output, type }) => {
+    onChanges: ({ input, output, type }) => {
       const outputFileName = path.basename(output);
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
@@ -29,17 +29,14 @@ async function buildTailwindCSS(params: {
   });
 }
 
-export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
-  if (!pluginConfig.tailwind?.css || !pluginConfig.tailwind?.config) {
+export const watchCss = async (k2Config: K2.Config) => {
+  if (!k2Config.tailwind?.css || !k2Config.tailwind?.config) {
     return;
   }
 
-  const tailwindConfig = await getTailwindConfig(pluginConfig.tailwind);
+  const tailwindConfig = await getTailwindConfigFromK2Config(k2Config.tailwind);
 
-  const inputFile = path.resolve(pluginConfig.tailwind.css);
+  const inputFile = path.resolve(k2Config.tailwind.css);
 
-  return Promise.all([
-    buildTailwindCSS({ inputFile, outputFileName: 'desktop.css', config: tailwindConfig.desktop }),
-    buildTailwindCSS({ inputFile, outputFileName: 'config.css', config: tailwindConfig.config }),
-  ]);
+  return buildTailwindCSS({ inputFile, outputFileName: 'styles.css', config: tailwindConfig });
 };

@@ -1,4 +1,5 @@
 import { pathToFileURL } from 'url';
+import { CONFIG_FILE_NAME, PLUGIN_CONFIG_FILE_NAME } from './constants.js';
 
 export const esmImport = (path: string) => {
   if (process.platform === 'win32') {
@@ -8,6 +9,10 @@ export const esmImport = (path: string) => {
   }
 };
 
-export const importPluginConfig = async (): Promise<Plugin.Meta.Config> => {
-  return (await esmImport('plugin.config.mjs')).default;
+export const importK2Config = async (configFileName?: string): Promise<K2.Config> => {
+  return (await esmImport(configFileName ?? CONFIG_FILE_NAME)).default;
+};
+
+export const importPluginConfig = async (configFileName?: string): Promise<Plugin.Meta.Config> => {
+  return (await esmImport(configFileName ?? PLUGIN_CONFIG_FILE_NAME)).default;
 };
