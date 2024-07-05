@@ -45,12 +45,14 @@ export async function action() {
         inputPath,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.css'),
         config: tailwindConfig.config,
+        minify: true,
       });
       console.log('✨ Built config.css');
       await outputCss({
         inputPath,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'desktop.css'),
         config: tailwindConfig.config,
+        minify: true,
       });
       console.log('✨ Built desktop.css');
     }
