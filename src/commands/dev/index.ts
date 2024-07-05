@@ -19,6 +19,7 @@ export default function command() {
     .option('-i, --input <input>', 'Input directory', 'src/apps')
     .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
     .option('-c, --certdir <certdir>', 'Certificate directory', WORKSPACE_DIRECTORY)
+    .option('--config <config>', 'k2 config file path')
     .option('-p, --port <port>', 'Port number')
     .action(action);
 }
@@ -27,9 +28,10 @@ export async function action(options: {
   outdir: string;
   certdir: string;
   port?: string;
+  config?: string;
   input: string;
 }) {
-  const { certdir, outdir, port: specifiedPort, input } = options;
+  const { certdir, outdir, config, port: specifiedPort, input } = options;
   console.group('🍳 Start development server');
   try {
     console.log(`📂 Output directory: ${outdir}`);
@@ -37,14 +39,17 @@ export async function action(options: {
 
     let k2Config: null | K2.Config = null;
     try {
-      k2Config = await importK2Config();
+      k2Config = await importK2Config(config);
     } catch (error) {
       console.log(`⚙ ${CONFIG_FILE_NAME} not found. use default settings.`);
     }
 
     const port = Number(specifiedPort ?? k2Config?.server?.port ?? DEFAULT_PORT);
 
-    await Promise.all([build({ certdir, outdir, port, input }), watchCss(k2Config?.plugin ?? {})]);
+    await Promise.all([
+      build({ certdir, outdir, port, input }),
+      watchCss({ k2Config: k2Config ?? {}, outdir }),
+    ]);
   } catch (error) {
     throw error;
   } finally {
