@@ -51,7 +51,7 @@ export async function action() {
       await outputCss({
         inputPath,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'desktop.css'),
-        config: tailwindConfig.config,
+        config: tailwindConfig.desktop,
         minify: true,
       });
       console.log('✨ Built desktop.css');
