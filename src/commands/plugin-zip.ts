@@ -36,6 +36,8 @@ async function action(options: { env: string; ppk: string }): Promise<void> {
     console.log(`📝 manifest.json generated (${env})`);
 
     await outputContentsZip(manifest);
+    console.log('📦 contents.zip generated');
+
     const buffer = await getContentsZipBuffer();
     const privateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
 
