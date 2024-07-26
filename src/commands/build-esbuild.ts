@@ -4,21 +4,26 @@ import path from 'path';
 import { WORKSPACE_DIRECTORY } from '../lib/constants.js';
 import { BuildOptions } from 'esbuild';
 import { buildWithEsbuild } from '../lib/esbuild.js';
+import { importK2Config } from '../lib/import.js';
+import { getDefaultK2Config } from '../lib/k2.js';
+import { buildTailwind } from './build-tailwind.js';
 
 export default function command() {
   program
     .command('esbuild-build')
     .option('-o, --outdir <outdir>', 'Output directory.', path.join(WORKSPACE_DIRECTORY, 'prod'))
     .option('-i, --input <input>', 'Input directory.', path.join('src', 'apps'))
+    .option('--config <config>', 'k2 config file path')
     .description("Build the project for production. (It's a wrapper of webpack build command.)")
     .action(action);
 }
 
-export async function action(options: { outdir: string; input: string }) {
+export async function action(options: { outdir: string; input: string; config?: string }) {
   console.group('🍳 Build the project for production');
 
   try {
-    const { outdir, input } = options;
+    const { outdir, input, config } = options;
+    const outDir = path.resolve(outdir);
 
     const allProjects = fs.readdirSync(path.resolve(input));
 
@@ -33,13 +38,19 @@ export async function action(options: { outdir: string; input: string }) {
 
     console.log(`📁 ${Object.keys(entryPoints).length} entry points`);
 
-    await buildWithEsbuild({
-      entryPoints,
-      outdir,
-      sourcemap: false,
-      minify: true,
-      target: 'es2020',
-    });
+    const k2Config = config ? await importK2Config(config) : getDefaultK2Config();
+    const fullConfig: K2.FullConfig = { ...k2Config, outDir };
+
+    await Promise.allSettled([
+      buildWithEsbuild({
+        entryPoints,
+        outdir,
+        sourcemap: false,
+        minify: true,
+        target: 'es2020',
+      }),
+      buildTailwind(fullConfig),
+    ]);
     console.log('✨ Build success.');
   } catch (error) {
     throw error;
