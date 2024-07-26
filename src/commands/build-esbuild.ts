@@ -22,7 +22,7 @@ export async function action(options: { outdir: string; input: string }) {
 
     const allProjects = fs.readdirSync(path.resolve(input));
 
-    const entryPoints = allProjects.reduce<BuildOptions['entryPoints']>((acc, dir) => {
+    const entryPoints = allProjects.reduce<NonNullable<BuildOptions['entryPoints']>>((acc, dir) => {
       for (const filename of ['index.ts', 'index.js', 'index.mjs']) {
         if (fs.existsSync(path.join(input, dir, filename))) {
           return { ...acc, [dir]: path.join(input, dir, filename) };
@@ -31,7 +31,15 @@ export async function action(options: { outdir: string; input: string }) {
       return acc;
     }, {});
 
-    await buildWithEsbuild({ entryPoints, outdir, minify: true, sourcemap: false });
+    console.log(`📁 ${Object.keys(entryPoints).length} entry points`);
+
+    await buildWithEsbuild({
+      entryPoints,
+      outdir,
+      sourcemap: false,
+      minify: true,
+      target: 'es2020',
+    });
     console.log('✨ Build success.');
   } catch (error) {
     throw error;
