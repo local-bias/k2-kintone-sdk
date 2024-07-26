@@ -44,4 +44,8 @@ declare namespace K2 {
       css?: string;
     };
   };
+
+  type FullConfig = Config & {
+    outDir: string;
+  };
 }

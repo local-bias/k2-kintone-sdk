@@ -3,21 +3,26 @@ import fs from 'fs-extra';
 import path from 'path';
 import { WORKSPACE_DIRECTORY } from '../lib/constants.js';
 import base from './build-base.js';
+import { buildTailwind } from './build-tailwind.js';
+import { importK2Config } from '../lib/import.js';
+import { getDefaultK2Config } from '../lib/k2.js';
 
 export default function command() {
   program
     .command('build')
     .option('-o, --outdir <outdir>', 'Output directory.', path.join(WORKSPACE_DIRECTORY, 'prod'))
     .option('-i, --input <input>', 'Input directory.', path.join('src', 'apps'))
+    .option('--config <config>', 'k2 config file path')
     .description("Build the project for production. (It's a wrapper of webpack build command.)")
     .action(action);
 }
 
-export async function action(options: { outdir: string; input: string }) {
+export async function action(options: { outdir: string; input: string; config?: string }) {
   console.group('🍳 Build the project for production');
 
   try {
-    const { outdir, input } = options;
+    const { outdir, input, config } = options;
+    const outDir = path.resolve(outdir);
 
     const allProjects = fs.readdirSync(path.resolve(input));
 
@@ -30,7 +35,10 @@ export async function action(options: { outdir: string; input: string }) {
       return acc;
     }, {});
 
-    await base({ entries, outDir: outdir });
+    const k2Config = config ? await importK2Config(config) : getDefaultK2Config();
+    const fullConfig: K2.FullConfig = { ...k2Config, outDir };
+
+    await Promise.allSettled([base({ entries, outDir }), buildTailwind(fullConfig)]);
     console.log('✨ Build success.');
   } catch (error) {
     throw error;
