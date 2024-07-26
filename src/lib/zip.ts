@@ -30,6 +30,9 @@ export const outputContentsZip = async (manifest: Plugin.Meta.Manifest) => {
     ]),
   ];
 
+  console.log('📁 Target files');
+  console.dir(targetFiles);
+
   targetFiles.forEach((file) => {
     const filePath = path.join(PLUGIN_CONTENTS_DIRECTORY, file);
     if (!fs.existsSync(filePath)) {
