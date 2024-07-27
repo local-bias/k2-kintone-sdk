@@ -47,7 +47,7 @@ export async function action(options: { outdir: string; input: string; config?: 
         outdir,
         sourcemap: false,
         minify: true,
-        target: 'es2020',
+        legalComments: 'none',
       }),
       buildTailwind(fullConfig),
     ]);

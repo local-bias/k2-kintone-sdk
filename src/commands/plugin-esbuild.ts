@@ -1,12 +1,12 @@
 import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
-import { Configuration } from 'webpack';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importPluginConfig } from '../lib/import.js';
 import { getTailwindConfig, outputCss } from '../lib/tailwind.js';
 import { BuildOptions } from 'esbuild';
 import { buildWithEsbuild } from '../lib/esbuild.js';
+import { lint } from '../lib/lint.js';
 
 export default function command() {
   program
@@ -21,14 +21,14 @@ export async function action() {
   try {
     const config = await importPluginConfig();
 
+    if (config?.lint?.build) {
+      await lint();
+      console.log('✨ Lint success.');
+    }
+
     if (!fs.existsSync(PLUGIN_CONTENTS_DIRECTORY)) {
       await fs.mkdir(PLUGIN_CONTENTS_DIRECTORY, { recursive: true });
     }
-
-    const entries: Configuration['entry'] = {
-      desktop: path.join('src', 'desktop', 'index.ts'),
-      config: path.join('src', 'config', 'index.ts'),
-    };
 
     if (config.tailwind?.css && config.tailwind?.config) {
       const tailwindConfig = await getTailwindConfig(config.tailwind);
@@ -40,12 +40,14 @@ export async function action() {
         inputPath,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.css'),
         config: tailwindConfig.config,
+        minify: true,
       });
       console.log('✨ Built config.css');
       await outputCss({
         inputPath,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'desktop.css'),
-        config: tailwindConfig.config,
+        config: tailwindConfig.desktop,
+        minify: true,
       });
       console.log('✨ Built desktop.css');
     }
@@ -60,6 +62,7 @@ export async function action() {
       outdir: PLUGIN_CONTENTS_DIRECTORY,
       minify: true,
       sourcemap: false,
+      legalComments: 'none',
     });
     console.log('✨ Built desktop.js and config.js');
     console.log('✨ Build success.');
