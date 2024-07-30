@@ -8,7 +8,7 @@ import genkey from './commands/genkey.js';
 import esbuildBuild from './commands/build-esbuild.js';
 import lint from './commands/lint.js';
 
-program.name('k2').version('1.3.1').description('k2 - 🍳 kintone kitchen 🍳');
+program.name('k2').version('1.4.0').description('k2 - 🍳 kintone kitchen 🍳');
 
 build();
 viteBuild();

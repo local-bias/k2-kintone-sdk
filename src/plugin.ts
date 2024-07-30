@@ -11,7 +11,7 @@ import upload from './commands/upload/index.js';
 import zip from './commands/plugin-zip.js';
 import lint from './commands/lint.js';
 
-program.name('plugin').version('1.3.1').description('🍳 kintone kitchen 🍳 for kintone plugin');
+program.name('plugin').version('1.4.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
 build();
 esbuild();
