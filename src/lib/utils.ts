@@ -11,10 +11,6 @@ export const isEnv = (env: string): env is Plugin.Meta.Env => {
 
 /**
  * プラグインを追加・更新するAPIを利用してプラグインをアップロードします
- * 2024年7月より実装された新しいAPIを利用します
- *
- * @param env
- * @returns
  */
 export const apiUploadZip = async (env: Plugin.Meta.Env): Promise<{ method: 'PUT' | 'POST' }> => {
   config();
@@ -89,6 +85,10 @@ KINTONE_PASSWORD`);
   return { method: 'POST' };
 };
 
+/**
+ * @kintone/plugin-uploaderを利用してプラグインをアップロードします
+ * APIを使用した方が高速ですが、2024年11月までは設定により無効になる可能性があるため、暫定的に残しています
+ */
 export const uploadZip = async (env: Plugin.Meta.Env) => {
   config();
 
@@ -103,8 +103,7 @@ export const uploadZip = async (env: Plugin.Meta.Env) => {
     throw new Error(`.envの設定が不十分です。以下のパラメータは必須です
 KINTONE_BASE_URL
 KINTONE_USERNAME
-KINTONE_PASSWORD
-    `);
+KINTONE_PASSWORD`);
   }
 
   const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
