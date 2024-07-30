@@ -43,7 +43,7 @@ export const watchContentsAndUploadZip = async (params: {
 
       await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
-      const { method } = await apiUploadZip('dev');
+      const { method } = await apiUploadZip({ env: 'dev', pluginId: output.id });
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
           chalk.cyan(`[upload] `) +

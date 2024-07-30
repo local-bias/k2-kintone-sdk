@@ -1,5 +1,6 @@
 import { PLUGIN_WORKSPACE_DIRECTORY } from './constants.js';
 import { exec } from './exec.js';
+import { KintoneApiClient } from './kintone-api-client.js';
 import { getZipFileNameSuffix } from './zip.js';
 import { config } from 'dotenv';
 import fs from 'fs-extra';
@@ -12,75 +13,33 @@ export const isEnv = (env: string): env is Plugin.Meta.Env => {
 /**
  * プラグインを追加・更新するAPIを利用してプラグインをアップロードします
  */
-export const apiUploadZip = async (env: Plugin.Meta.Env): Promise<{ method: 'PUT' | 'POST' }> => {
-  config();
+export const apiUploadZip = async (params: {
+  env: Plugin.Meta.Env;
+  pluginId: string;
+}): Promise<{ method: 'PUT' | 'POST' }> => {
+  const { env, pluginId } = params;
 
-  const {
-    KINTONE_BASE_URL,
-    KINTONE_USERNAME,
-    KINTONE_PASSWORD,
-    KINTONE_BASIC_AUTH_USERNAME = '',
-    KINTONE_BASIC_AUTH_PASSWORD = '',
-  } = process.env;
-  if (!KINTONE_BASE_URL || !KINTONE_USERNAME || !KINTONE_PASSWORD) {
-    throw new Error(`.envの設定が不十分です。以下のパラメータは必須です
-KINTONE_BASE_URL
-KINTONE_USERNAME
-KINTONE_PASSWORD`);
-  }
-
-  const authHeader = {
-    'X-Cybozu-Authorization': Buffer.from(`${KINTONE_USERNAME}:${KINTONE_PASSWORD}`).toString(
-      'base64'
-    ),
-    ...(KINTONE_BASIC_AUTH_USERNAME &&
-      KINTONE_BASIC_AUTH_PASSWORD && {
-        Authorization: `Basic ${Buffer.from(
-          `${KINTONE_BASIC_AUTH_USERNAME}:${KINTONE_BASIC_AUTH_PASSWORD}`
-        ).toString('base64')}`,
-      }),
-  };
+  const kc = new KintoneApiClient();
 
   const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
 
   const zipFile = new Blob([await fs.readFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName))]);
 
-  const form = new FormData();
-  form.append('file', zipFile, zipFileName);
+  const fileKey = await kc.upload({ blob: zipFile, fileName: zipFileName });
 
-  const uploadResult = await fetch(`${KINTONE_BASE_URL}/k/v1/file.json`, {
-    method: 'POST',
-    headers: authHeader,
-    body: form,
-  });
+  const plugins = await kc.getAllPlugins();
 
-  const { fileKey }: { fileKey: string } = await uploadResult.json();
-
-  const pluginEndpoint = `${KINTONE_BASE_URL}/k/v1/plugin.json`;
-  const pluginResponse = await fetch(pluginEndpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeader,
-    },
-    body: JSON.stringify({
-      fileKey,
-    }),
-  });
-
-  const pluginResult = await pluginResponse.json();
-
-  // プラグインがすでに存在する場合
-  if (pluginResult?.code === 'GAIA_PL18') {
-    await fetch(pluginEndpoint, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader,
-      },
-      body: JSON.stringify({ fileKey }),
-    });
+  const plugin = plugins.find((p) => p.id === pluginId);
+  if (plugin) {
+    const json = await kc.updatePlugin({ id: pluginId, fileKey });
+    if ('errors' in json && json.errors) {
+      console.error((json.errors.id?.messages ?? []).map((m: string) => `Error: ${m}`).join('\n'));
+    }
     return { method: 'PUT' };
+  }
+  const result = await kc.addPlugin({ fileKey });
+  if ('code' in result) {
+    console.error(`Error: ${result.message}`);
   }
   return { method: 'POST' };
 };
