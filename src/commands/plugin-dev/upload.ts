@@ -4,7 +4,7 @@ import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '.
 import fs from 'fs-extra';
 import path from 'path';
 import { PLUGIN_WORKSPACE_DIRECTORY } from '../../lib/constants.js';
-import { uploadZip } from '../../lib/utils.js';
+import { apiUploadZip } from '../../lib/utils.js';
 import chokider from 'chokidar';
 import chalk from 'chalk';
 
@@ -43,16 +43,11 @@ export const watchContentsAndUploadZip = async (params: {
 
       await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
 
+      const { method } = await apiUploadZip('dev');
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
           chalk.cyan(`[upload] `) +
-          `start uploading`
-      );
-      await uploadZip('dev');
-      console.log(
-        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
-          chalk.cyan(`[upload] `) +
-          `done`
+          `uploaded ${method === 'POST' ? '(new)' : '(update)'}`
       );
     } catch (error: any) {
       console.log(
