@@ -25,6 +25,10 @@ export async function action(options: { outdir: string; input: string; config?: 
     const { outdir, input, config } = options;
     const outDir = path.resolve(outdir);
 
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirSync(outDir, { recursive: true });
+    }
+
     const allProjects = fs.readdirSync(path.resolve(input));
 
     const entryPoints = allProjects.reduce<NonNullable<BuildOptions['entryPoints']>>((acc, dir) => {
