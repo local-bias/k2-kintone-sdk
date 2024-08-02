@@ -47,7 +47,12 @@ export const buildWithWebpack = async (props: {
         plugins: [new MiniCssExtractPlugin()],
         optimization: {
           minimize: true,
-          minimizer: [new TerserPlugin({ extractComments: false })],
+          minimizer: [
+            new TerserPlugin({
+              terserOptions: { format: { comments: false } },
+              extractComments: false,
+            }),
+          ],
         },
       },
       (err, stats) => {
