@@ -7,7 +7,6 @@ import genkey from './commands/plugin-genkey.js';
 import init from './commands/plugin-init.js';
 import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
-import upload from './commands/upload/index.js';
 import zip from './commands/plugin-zip.js';
 import lint from './commands/lint.js';
 
@@ -20,7 +19,6 @@ genkey();
 init();
 manifest();
 test();
-upload();
 zip();
 lint();
 

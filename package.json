@@ -25,7 +25,6 @@
   "license": "ISC",
   "dependencies": {
     "@kintone/plugin-packer": "^8",
-    "@kintone/plugin-uploader": "^9",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
     "archiver": "^7",

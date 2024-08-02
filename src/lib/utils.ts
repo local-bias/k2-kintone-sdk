@@ -1,8 +1,6 @@
 import { PLUGIN_WORKSPACE_DIRECTORY } from './constants.js';
-import { exec } from './exec.js';
 import { KintoneApiClient } from './kintone-api-client.js';
 import { getZipFileNameSuffix } from './zip.js';
-import { config } from 'dotenv';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -47,7 +45,9 @@ export const apiUploadZip = async (params: {
 /**
  * @kintone/plugin-uploaderを利用してプラグインをアップロードします
  * APIを使用した方が高速ですが、2024年11月までは設定により無効になる可能性があるため、暫定的に残しています
+ * 使用するには@kintone/plugin-uploaderがインストールされている必要があります
  */
+/*
 export const uploadZip = async (env: Plugin.Meta.Env) => {
   config();
 
@@ -74,3 +74,4 @@ KINTONE_PASSWORD`);
 
   return exec(command);
 };
+*/
