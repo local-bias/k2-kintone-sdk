@@ -2,7 +2,7 @@ import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
-import { importPluginConfig } from '../lib/import.js';
+import { importK2PluginConfig } from '../lib/import.js';
 import { getTailwindConfig, outputCss } from '../lib/tailwind.js';
 import { BuildOptions } from 'esbuild';
 import { buildWithEsbuild } from '../lib/esbuild.js';
@@ -19,7 +19,7 @@ export async function action() {
   console.group('🍳 Build the project for production');
 
   try {
-    const config = await importPluginConfig();
+    const config = await importK2PluginConfig();
 
     if (config?.lint?.build) {
       await lint();

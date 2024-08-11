@@ -7,7 +7,7 @@ import {
   PLUGIN_DEVELOPMENT_DIRECTORY,
   PLUGIN_WORKSPACE_DIRECTORY,
 } from '../../lib/constants.js';
-import { importPluginConfig } from '../../lib/import.js';
+import { importK2PluginConfig } from '../../lib/import.js';
 import base from '../dev-base-esbuild.js';
 import { getManifest } from './create-manifest.js';
 import { watchCss } from './tailwind.js';
@@ -29,7 +29,7 @@ export async function action(options: { ppk: string }) {
   console.group('🍳 Start development server');
   try {
     const { ppk: ppkPath } = options;
-    const config = await importPluginConfig();
+    const config = await importK2PluginConfig();
 
     if (!fs.existsSync(PLUGIN_DEVELOPMENT_DIRECTORY)) {
       await fs.mkdir(PLUGIN_DEVELOPMENT_DIRECTORY, { recursive: true });

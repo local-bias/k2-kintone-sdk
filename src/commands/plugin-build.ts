@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { Configuration } from 'webpack';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
-import { importPluginConfig } from '../lib/import.js';
+import { importK2PluginConfig } from '../lib/import.js';
 import { getTailwindConfig, outputCss } from '../lib/tailwind.js';
 import base from './build-base.js';
 import { lint } from '../lib/lint.js';
@@ -19,7 +19,7 @@ export async function action() {
   console.group('🍳 Build the project for production');
 
   try {
-    const config = await importPluginConfig();
+    const config = await importK2PluginConfig();
 
     if (config?.lint?.build) {
       await lint();

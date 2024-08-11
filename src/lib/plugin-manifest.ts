@@ -1,5 +1,5 @@
 import { PLUGIN_CONTENTS_DIRECTORY } from './constants.js';
-import { importPluginConfig } from './import.js';
+import { importK2PluginConfig } from './import.js';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -25,7 +25,7 @@ export const outputManifest = async (
   env: 'dev' | 'prod' | 'standalone',
   options?: { config?: Plugin.Meta.Config }
 ): Promise<Plugin.Meta.Manifest> => {
-  const config = options?.config || (await importPluginConfig());
+  const config = options?.config || (await importK2PluginConfig());
 
   const merged = merge(config.manifest.base, config.manifest[env] || {}) as Plugin.Meta.Manifest;
 

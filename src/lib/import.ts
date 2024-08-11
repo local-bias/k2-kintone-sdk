@@ -14,6 +14,8 @@ export const importK2Config = async (configFileName?: string): Promise<K2.Config
   return (await esmImport(path.resolve(configFileName ?? CONFIG_FILE_NAME))).default;
 };
 
-export const importPluginConfig = async (configFileName?: string): Promise<Plugin.Meta.Config> => {
+export const importK2PluginConfig = async (
+  configFileName?: string
+): Promise<Plugin.Meta.Config> => {
   return (await esmImport(path.resolve(configFileName ?? PLUGIN_CONFIG_FILE_NAME))).default;
 };
