@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/k2",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "kintone sdk",
   "main": "./dist/index.js",
   "type": "module",
