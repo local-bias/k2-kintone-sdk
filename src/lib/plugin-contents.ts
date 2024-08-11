@@ -11,11 +11,15 @@ export const copyPluginContents = async (
     await fs.mkdir(inputDir, { recursive: true });
   }
 
-  await fs.copy(inputDir, path.join(outputDir), {
-    overwrite: true,
-  });
+  await fs.copy(inputDir, outputDir, { overwrite: true });
 
-  const html = await fs.readFile(path.join(outputDir, 'config.html'), 'utf8');
+  const configHtmlPath = path.join(outputDir, 'config.html');
+
+  if (!fs.existsSync(configHtmlPath)) {
+    throw new Error(`Plugin HTML file not found. Create "config.html" in ${outputDir}.`);
+  }
+
+  const html = await fs.readFile(configHtmlPath, 'utf8');
 
   const minified = htmlMinifier.minify(html, {
     minifyCSS: true,
@@ -28,5 +32,5 @@ export const copyPluginContents = async (
     useShortDoctype: true,
   });
 
-  await fs.writeFile(path.join(outputDir, 'config.html'), minified);
+  await fs.writeFile(configHtmlPath, minified);
 };
