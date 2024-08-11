@@ -16,7 +16,7 @@ export const copyPluginContents = async (
   const configHtmlPath = path.join(outputDir, 'config.html');
 
   if (!fs.existsSync(configHtmlPath)) {
-    throw new Error(`Plugin HTML file not found. Create "config.html" in ${outputDir}.`);
+    throw new Error(`Plugin HTML file not found. Create "config.html" in ${inputDir}.`);
   }
 
   const html = await fs.readFile(configHtmlPath, 'utf8');
