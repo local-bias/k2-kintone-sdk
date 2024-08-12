@@ -42,7 +42,7 @@ export async function lint() {
     },
   });
 
-  const results = await eslint.lintFiles(['src/**/*.ts', 'src/**/*.tsx']);
+  const results = await eslint.lintFiles(['src/**/*.{ts,tsx?}']);
 
   const formatter = await eslint.loadFormatter('stylish');
   const resultText = formatter.format(results);
