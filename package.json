@@ -33,6 +33,7 @@
     "commander": "^12",
     "css-loader": "^7",
     "cssnano": "^7",
+    "deepmerge": "^4.3.1",
     "dotenv": "^16",
     "esbuild": "^0.23",
     "eslint": "^8",

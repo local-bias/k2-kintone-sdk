@@ -2,24 +2,7 @@ import { PLUGIN_CONTENTS_DIRECTORY } from './constants.js';
 import { importK2PluginConfig } from './import.js';
 import fs from 'fs-extra';
 import path from 'path';
-
-function merge(src: Record<string, any>, dst: Record<string, any>): Record<string, any> {
-  return Object.entries(src).reduce((acc, [key, value]) => {
-    if (!dst[key]) {
-      return { ...acc, [key]: value };
-    }
-
-    if (typeof dst[key] === 'string') {
-      return { ...acc, [key]: dst[key] };
-    }
-
-    if (Array.isArray(value) && Array.isArray(dst[key])) {
-      return { ...acc, [key]: [...value, ...dst[key]] };
-    }
-
-    return { ...acc, [key]: merge(src[key], dst[key]) };
-  }, {});
-}
+import merge from 'deepmerge';
 
 export const outputManifest = async (
   env: 'dev' | 'prod' | 'standalone',
