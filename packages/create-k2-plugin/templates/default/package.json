@@ -1,0 +1,21 @@
+{
+  "name": "kintone-plugin-template",
+  "version": "2.0.1",
+  "author": "ribbit",
+  "license": "MIT",
+  "scripts": {
+    "init": "plugin init && plugin genkey",
+    "build": "plugin build && plugin zip",
+    "standalone": "plugin build && plugin zip --env standalone",
+    "dev": "plugin dev"
+  },
+  "browser": {
+    "path": false
+  },
+  "devDependencies": {
+    "@kintone/dts-gen": "^8.0.12",
+    "@konomi-app/k2": "^1.4.7",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.5.4"
+  }
+}
