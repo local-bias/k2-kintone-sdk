@@ -38,7 +38,15 @@ export async function action(options: { outdir: string; input: string; config?: 
     const k2Config = config ? await importK2Config(config) : getDefaultK2Config();
     const fullConfig: K2.FullConfig = { ...k2Config, outDir };
 
-    await Promise.allSettled([base({ entries, outDir }), buildTailwind(fullConfig)]);
+    const results = await Promise.allSettled([
+      base({ entries, outDir }),
+      buildTailwind(fullConfig),
+    ]);
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        throw result.reason;
+      }
+    }
     console.log('✨ Build success.');
   } catch (error) {
     throw error;
