@@ -2,7 +2,7 @@ import path from 'path';
 import { type Config as TailwindConfig } from 'tailwindcss';
 import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
 import chalk from 'chalk';
-import { getTailwindConfig, watchTailwindCSS } from '../../lib/tailwind.js';
+import { getTailwindConfig, getTailwindInputCss, watchTailwindCSS } from '../../lib/tailwind.js';
 
 async function buildTailwindCSS(params: {
   inputFile: string;
@@ -36,10 +36,18 @@ export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
 
   const tailwindConfig = await getTailwindConfig(pluginConfig.tailwind);
 
-  const inputFile = path.resolve(pluginConfig.tailwind.css);
+  const inputFile = getTailwindInputCss(pluginConfig.tailwind);
 
   return Promise.all([
-    buildTailwindCSS({ inputFile, outputFileName: 'desktop.css', config: tailwindConfig.desktop }),
-    buildTailwindCSS({ inputFile, outputFileName: 'config.css', config: tailwindConfig.config }),
+    buildTailwindCSS({
+      inputFile: inputFile.desktop,
+      outputFileName: 'desktop.css',
+      config: tailwindConfig.desktop,
+    }),
+    buildTailwindCSS({
+      inputFile: inputFile.config,
+      outputFileName: 'config.css',
+      config: tailwindConfig.config,
+    }),
   ]);
 };

@@ -15,6 +15,21 @@ export const getTailwindConfigFromK2Config = async (
   return config;
 };
 
+export const getTailwindInputCss = (
+  config: Plugin.Meta.Config['tailwind']
+): { desktop: string; config: string } => {
+  invariant(config?.css, 'tailwind.css is required');
+  const { css } = config;
+  if (typeof css === 'string') {
+    const resolved = path.resolve(css);
+    return { desktop: resolved, config: resolved };
+  }
+  return {
+    desktop: path.resolve(css.desktop),
+    config: path.resolve(css.config),
+  };
+};
+
 export const getTailwindConfig = async (
   config: Plugin.Meta.Config['tailwind']
 ): Promise<{

@@ -134,7 +134,7 @@ declare namespace Plugin {
       tailwind?: {
         config?: string | { config: string; desktop: string };
         /** CSSファイルのパス */
-        css?: string;
+        css?: string | { config: string; desktop: string };
       };
     };
   }

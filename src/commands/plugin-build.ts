@@ -4,7 +4,7 @@ import path from 'path';
 import { Configuration } from 'webpack';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importK2PluginConfig } from '../lib/import.js';
-import { getTailwindConfig, outputCss } from '../lib/tailwind.js';
+import { getTailwindConfig, getTailwindInputCss, outputCss } from '../lib/tailwind.js';
 import base from './build-base.js';
 import { lint } from '../lib/lint.js';
 
@@ -38,18 +38,17 @@ export async function action() {
     if (config.tailwind?.css && config.tailwind?.config) {
       const tailwindConfig = await getTailwindConfig(config.tailwind);
 
-      const inputFile = path.resolve(config.tailwind.css);
-      const inputPath = path.resolve(inputFile);
+      const inputFile = getTailwindInputCss(config.tailwind);
 
       await outputCss({
-        inputPath,
+        inputPath: inputFile.config,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.css'),
         config: tailwindConfig.config,
         minify: true,
       });
       console.log('✨ Built config.css');
       await outputCss({
-        inputPath,
+        inputPath: inputFile.desktop,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'desktop.css'),
         config: tailwindConfig.desktop,
         minify: true,
