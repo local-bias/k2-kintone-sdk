@@ -29,7 +29,7 @@ export const watchCss = async (params: { k2Config: K2.Config; outdir: string }) 
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
           chalk.cyan(`[css] `) +
           outputFileName +
-          (type === 'init' ? ' init' : ` rebuilt`)
+          (type === 'init' ? ' init' : ` rebuilt(${type})`)
       );
     },
   });
