@@ -88,6 +88,14 @@ export const watchTailwindCSS = async (params: {
 }) => {
   const { input, output, config } = params;
 
+  const content = config.content;
+
+  if (!content) {
+    console.warn(
+      `No content is provided in tailwind config. use default content: ['./src/**/*.{ts,tsx}'] and ${input}`
+    );
+  }
+
   const watcher = chokidar.watch(
     [...((config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}']), input],
     {

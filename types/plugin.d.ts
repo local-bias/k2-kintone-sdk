@@ -93,6 +93,12 @@ declare namespace Plugin {
         standalone?: Partial<Manifest>;
       };
       pluginReleasePageUrl?: string;
+      /**
+       * プラグインのZIPファイルのURL
+       *
+       * このURLが設定されている場合、ユーザーはプラグイン設定画面から、ZIPファイルをダウンロードしてインストールできます
+       */
+      zipFileUrl?: string;
       inquiriesPageUrl?: string;
       promotionPageUrl?: string;
       bannerPageUrl?: string;
