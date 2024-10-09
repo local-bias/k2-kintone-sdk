@@ -1,11 +1,12 @@
+import chokidar from 'chokidar';
 import cssnanoPlugin from 'cssnano';
 import fs from 'fs-extra';
 import path from 'path';
 import postcss from 'postcss';
+import { debounce } from 'remeda';
 import tailwindcss, { type Config as TailwindConfig } from 'tailwindcss';
 import invariant from 'tiny-invariant';
 import { esmImport } from './import.js';
-import chokidar from 'chokidar';
 
 export const getTailwindConfigFromK2Config = async (
   k2Config: K2.Config['tailwind']
@@ -88,42 +89,53 @@ export const watchTailwindCSS = async (params: {
 }) => {
   const { input, output, config } = params;
 
-  const watcher = chokidar.watch(
-    [...((config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}']), input],
-    {
-      ignored: /node_modules/,
-      persistent: true,
-      awaitWriteFinish: {
-        stabilityThreshold: 2000,
-        pollInterval: 100,
-      },
-    }
-  );
+  const content = (config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}'];
 
-  let initialScanComplete = false;
+  const watcher = chokidar.watch([...content, input], {
+    ignored: /node_modules/,
+    persistent: true,
+    ignoreInitial: true,
+  });
 
-  const listener = async (type: WatchType, path?: string) => {
+  let isInitialized = false;
+
+  const processChanges = async (type: WatchType) => {
     try {
-      if (type === 'add' && !initialScanComplete) {
-        return;
-      }
-
       await outputCss({ inputPath: input, outputPath: output, config });
-
-      if (params.onChanges) {
-        params.onChanges({ input, output, type });
-      }
+      params.onChanges?.({ input, output, type });
     } catch (error) {
       console.error('Error building Tailwind CSS:', error);
     }
   };
 
+  const debouncedProcessChanges = debounce(processChanges, { waitMs: 1000 });
+
   watcher.on('ready', async () => {
-    initialScanComplete = true;
-    await listener('init');
+    if (!isInitialized) {
+      isInitialized = true;
+      await processChanges('init');
+    }
   });
 
-  watcher.on('change', (path) => listener('change', path));
-  watcher.on('add', (path) => listener('add', path));
-  watcher.on('unlink', () => listener('unlink'));
+  watcher.on('all', (eventName) => {
+    if (isInitialized) {
+      let type: WatchType;
+      switch (eventName) {
+        case 'add':
+          type = 'add';
+          break;
+        case 'change':
+          type = 'change';
+          break;
+        case 'unlink':
+          type = 'unlink';
+          break;
+        default:
+          return;
+      }
+      debouncedProcessChanges.call(type);
+    }
+  });
+
+  return watcher;
 };

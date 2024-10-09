@@ -47,6 +47,7 @@
     "html-minifier": "^4",
     "mini-css-extract-plugin": "^2",
     "postcss": "^8",
+    "remeda": "^2.15.0",
     "sass": "^1",
     "sass-loader": "^16",
     "style-loader": "^4",
