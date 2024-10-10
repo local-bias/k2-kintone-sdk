@@ -117,6 +117,10 @@ export const watchTailwindCSS = async (params: {
     }
   });
 
+  watcher.on('error', (error) => {
+    console.error('Error watching Tailwind CSS:', error);
+  });
+
   watcher.on('all', (eventName) => {
     if (isInitialized) {
       let type: WatchType;
