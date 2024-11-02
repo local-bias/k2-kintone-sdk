@@ -1,27 +1,3 @@
-type Locales = {
-  /** 日本語 */
-  ja: string;
-  /** 英語 */
-  en: string;
-  /** 簡体字中国語 */
-  zh: string;
-};
-
-type Resources = {
-  /**
-   * プラグインのJavaScriptファイル
-   *
-   * URLの配列
-   */
-  js: string[];
-  /**
-   * プラグインのCSSファイル
-   *
-   * URLの配列
-   */
-  css: string[];
-};
-
 declare namespace Plugin {
   namespace Meta {
     type Env = 'dev' | 'prod' | 'standalone';
@@ -144,4 +120,28 @@ declare namespace Plugin {
       };
     };
   }
+
+  type Locales = {
+    /** 日本語 */
+    ja: string;
+    /** 英語 */
+    en: string;
+    /** 簡体字中国語 */
+    zh: string;
+  };
+
+  type Resources = {
+    /**
+     * プラグインのJavaScriptファイル
+     *
+     * URLの配列
+     */
+    js: string[];
+    /**
+     * プラグインのCSSファイル
+     *
+     * URLの配列
+     */
+    css: string[];
+  };
 }
