@@ -1,6 +1,7 @@
 import chokidar from 'chokidar';
 import cssnanoPlugin from 'cssnano';
 import fs from 'fs-extra';
+import { glob } from 'glob';
 import path from 'path';
 import postcss from 'postcss';
 import { debounce } from 'remeda';
@@ -91,8 +92,9 @@ export const watchTailwindCSS = async (params: {
 
   const content = (config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}'];
 
-  const watcher = chokidar.watch([...content, input], {
-    ignored: /node_modules/,
+  const files = await glob([...content, input], { ignore: ['**/node_modules/**'] });
+
+  const watcher = chokidar.watch(files, {
     persistent: true,
     ignoreInitial: true,
   });
@@ -121,24 +123,17 @@ export const watchTailwindCSS = async (params: {
     console.error('Error watching Tailwind CSS:', error);
   });
 
-  watcher.on('all', (eventName) => {
-    if (isInitialized) {
-      let type: WatchType;
-      switch (eventName) {
-        case 'add':
-          type = 'add';
-          break;
-        case 'change':
-          type = 'change';
-          break;
-        case 'unlink':
-          type = 'unlink';
-          break;
-        default:
-          return;
-      }
-      debouncedProcessChanges.call(type);
-    }
+  watcher.on('add', (path) => {
+    debouncedProcessChanges.call('add');
+  });
+  watcher.on('change', (path) => {
+    debouncedProcessChanges.call('change');
+  });
+  watcher.on('unlink', (path) => {
+    debouncedProcessChanges.call('unlink');
+  });
+  watcher.on('unlinkDir', (path) => {
+    debouncedProcessChanges.call('unlink');
   });
 
   return watcher;
