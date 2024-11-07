@@ -57,8 +57,7 @@
     "tiny-invariant": "^1",
     "ts-loader": "^9",
     "tsconfig-paths-webpack-plugin": "^4",
-    "vite": "^5",
-    "vite-tsconfig-paths": "^5",
+    "tsup": "^8",
     "webpack": "^5"
   },
   "devDependencies": {
