@@ -1,0 +1,21 @@
+{
+  "name": "create-k2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "create-k2": "index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Adachi Keiichiro",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "prompts": "^2.4.2",
+    "tiged": "^2.12.7"
+  }
+}
