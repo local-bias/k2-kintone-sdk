@@ -1,0 +1,23 @@
+{
+  "name": "k2-app",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "init": "k2 genkey",
+    "dev": "k2 dev",
+    "build": "k2 build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@kintone/dts-gen": "^8.1.0",
+    "@konomi-app/kintone-utilities": "^5.11.0"
+  },
+  "devDependencies": {
+    "@konomi-app/k2": "^1.7.7",
+    "@konomi-app/prettier-config": "^1.1.2"
+  },
+  "prettier": "@konomi-app/prettier-config"
+}
