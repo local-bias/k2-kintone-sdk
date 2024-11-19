@@ -9,6 +9,7 @@ import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
 import zip from './commands/plugin-zip.js';
 import lint from './commands/lint.js';
+import tsup from './commands/plugin-tsup.js';
 
 program.name('plugin').version('1.4.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
@@ -21,5 +22,6 @@ manifest();
 test();
 zip();
 lint();
+tsup();
 
 program.parse(process.argv);
