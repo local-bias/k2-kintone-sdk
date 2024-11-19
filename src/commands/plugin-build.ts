@@ -1,7 +1,7 @@
 import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
-import { Configuration } from 'webpack';
+import { type Configuration } from 'webpack';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importK2PluginConfig } from '../lib/import.js';
 import { getTailwindConfig, getTailwindInputCss, outputCss } from '../lib/tailwind.js';

@@ -2,7 +2,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import path from 'path';
 import { cwd } from 'process';
 import TerserPlugin from 'terser-webpack-plugin';
-import webpack, { Configuration } from 'webpack';
+import webpack, { type Configuration } from 'webpack';
 import chalk from 'chalk';
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin';
 

@@ -4,7 +4,7 @@ import path from 'path';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importK2PluginConfig } from '../lib/import.js';
 import { getTailwindConfig, getTailwindInputCss, outputCss } from '../lib/tailwind.js';
-import { BuildOptions } from 'esbuild';
+import { type BuildOptions } from 'esbuild';
 import { buildWithEsbuild } from '../lib/esbuild.js';
 import { lint } from '../lib/lint.js';
 

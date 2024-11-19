@@ -1,4 +1,4 @@
-import { Plugin } from 'esbuild';
+import { type Plugin } from 'esbuild';
 import { compile } from 'sass';
 import { resolve } from 'path';
 

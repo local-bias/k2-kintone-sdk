@@ -1,4 +1,4 @@
-import { Configuration } from 'webpack';
+import { type Configuration } from 'webpack';
 import { buildWithWebpack } from '../lib/webpack.js';
 
 export default async function action(params: { entries: Configuration['entry']; outDir: string }) {

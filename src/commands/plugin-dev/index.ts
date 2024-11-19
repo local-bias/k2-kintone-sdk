@@ -1,5 +1,5 @@
 import { program } from 'commander';
-import { BuildOptions } from 'esbuild';
+import { type BuildOptions } from 'esbuild';
 import fs from 'fs-extra';
 import path from 'path';
 import {

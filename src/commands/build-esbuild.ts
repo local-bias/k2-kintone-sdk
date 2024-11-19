@@ -2,7 +2,7 @@ import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
 import { WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import { BuildOptions } from 'esbuild';
+import { type BuildOptions } from 'esbuild';
 import { buildWithEsbuild } from '../lib/esbuild.js';
 import { importK2Config } from '../lib/import.js';
 import { getDefaultK2Config } from '../lib/k2.js';
