@@ -1,10 +1,15 @@
-import { restorePluginConfig } from '@/lib/plugin';
+import {
+  PluginCommonConfig,
+  PluginCondition,
+  PluginConfig,
+  restorePluginConfig,
+} from '@/lib/plugin';
 import { produce } from 'immer';
 import { atom, PrimitiveAtom } from 'jotai';
 import { focusAtom } from 'jotai-optics';
 import { atomWithReset } from 'jotai/utils';
 
-export const pluginConfigAtom = atom<Plugin.Config>(restorePluginConfig());
+export const pluginConfigAtom = atom<PluginConfig>(restorePluginConfig());
 export const loadingAtom = atom(false);
 export const conditionsAtom = focusAtom(pluginConfigAtom, (s) => s.prop('conditions'));
 export const conditionsLengthAtom = focusAtom(conditionsAtom, (s) => s.prop('length'));
@@ -17,7 +22,7 @@ export const selectedConditionAtom = atom(
     const selectedConditionId = get(selectedConditionIdAtom);
     return conditions.find((condition) => condition.id === selectedConditionId) ?? conditions[0]!;
   },
-  (get, set, newValue: Plugin.Condition) => {
+  (get, set, newValue: PluginCondition) => {
     const selectedConditionId = get(selectedConditionIdAtom);
     set(conditionsAtom, (current) =>
       produce(current, (draft) => {
@@ -30,8 +35,8 @@ export const selectedConditionAtom = atom(
   }
 );
 
-export const getCommonPropertyAtom = <T extends keyof Plugin.Common>(property: T) =>
-  focusAtom(commonConfigAtom, (s) => s.prop(property)) as PrimitiveAtom<Plugin.Common[T]>;
+export const getCommonPropertyAtom = <T extends keyof PluginCommonConfig>(property: T) =>
+  focusAtom(commonConfigAtom, (s) => s.prop(property)) as PrimitiveAtom<PluginCommonConfig[T]>;
 
-export const getConditionPropertyAtom = <T extends keyof Plugin.Condition>(property: T) =>
-  focusAtom(selectedConditionAtom, (s) => s.prop(property)) as PrimitiveAtom<Plugin.Condition[T]>;
+export const getConditionPropertyAtom = <T extends keyof PluginCondition>(property: T) =>
+  focusAtom(selectedConditionAtom, (s) => s.prop(property)) as PrimitiveAtom<PluginCondition[T]>;

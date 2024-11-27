@@ -1,7 +1,7 @@
 import { restorePluginConfig as restore } from '@konomi-app/kintone-utilities';
 import { nanoid } from 'nanoid';
-import { isProd, PLUGIN_ID } from './global';
 import { z } from 'zod';
+import { isProd, PLUGIN_ID } from './global';
 
 export const PluginConditionV1Schema = z.object({
   id: z.string(),
@@ -17,12 +17,25 @@ export const PluginConfigV1Schema = z.object({
   }),
   conditions: z.array(PluginConditionV1Schema),
 });
+type PluginConfigV1 = z.infer<typeof PluginConfigV1Schema>;
 
-export const validatePluginCondition = (condition: unknown): Plugin.Condition => {
+/** 🔌 プラグインがアプリ単位で保存する設定情報 */
+export type PluginConfig = PluginConfigV1;
+
+/** 🔌 プラグインの共通設定 */
+export type PluginCommonConfig = PluginConfig['common'];
+
+/** 🔌 プラグインの詳細設定 */
+export type PluginCondition = PluginConfig['conditions'][number];
+
+/** 🔌 過去全てのバージョンを含むプラグインの設定情報 */
+type AnyPluginConfig = PluginConfigV1; // | PluginConfigV2 | ...;
+
+export const validatePluginCondition = (condition: unknown): PluginCondition => {
   return PluginConditionV1Schema.parse(condition);
 };
 
-export const getNewCondition = (): Plugin.Condition => ({
+export const getNewCondition = (): PluginCondition => ({
   id: nanoid(),
   memo: '',
   fields: [''],
@@ -32,7 +45,7 @@ export const getNewCondition = (): Plugin.Condition => ({
 /**
  * プラグインの設定情報のひな形を返却します
  */
-export const createConfig = (): Plugin.Config => ({
+export const createConfig = (): PluginConfig => ({
   version: 1,
   common: {
     memo: '',
@@ -48,7 +61,7 @@ export const createConfig = (): Plugin.Config => ({
  * @param anyConfig 保存されている設定情報
  * @returns 新しいバージョンの設定情報
  */
-export const migrateConfig = (anyConfig: Plugin.AnyConfig): Plugin.Config => {
+export const migrateConfig = (anyConfig: AnyPluginConfig): PluginConfig => {
   const { version } = anyConfig;
   switch (version) {
     case undefined:
@@ -64,19 +77,19 @@ export const migrateConfig = (anyConfig: Plugin.AnyConfig): Plugin.Config => {
 /**
  * プラグインの設定情報を復元します
  */
-export const restorePluginConfig = (): Plugin.Config => {
-  const config = restore<Plugin.AnyConfig>(PLUGIN_ID, { debug: !isProd }) ?? createConfig();
+export const restorePluginConfig = (): PluginConfig => {
+  const config = restore<AnyPluginConfig>(PLUGIN_ID, { debug: !isProd }) ?? createConfig();
   return migrateConfig(config);
 };
 
-export const getConditionField = <T extends keyof Plugin.Condition>(
-  storage: Plugin.Config,
+export const getConditionField = <T extends keyof PluginCondition>(
+  storage: PluginConfig,
   props: {
     conditionIndex: number;
     key: T;
-    defaultValue: NonNullable<Plugin.Condition[T]>;
+    defaultValue: NonNullable<PluginCondition[T]>;
   }
-): NonNullable<Plugin.Condition[T]> => {
+): NonNullable<PluginCondition[T]> => {
   const { conditionIndex, key, defaultValue } = props;
   if (!storage.conditions[conditionIndex]) {
     return defaultValue;

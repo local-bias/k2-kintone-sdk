@@ -3,7 +3,7 @@ import { PLUGIN_NAME } from '@/lib/constants';
 import { manager } from '@/lib/event-manager';
 import { isProd } from '@/lib/global';
 import { t } from '@/lib/i18n';
-import { restorePluginConfig } from '@/lib/plugin';
+import { PluginConfig, restorePluginConfig } from '@/lib/plugin';
 import { store } from '@/lib/store';
 import { ComponentManager } from '@konomi-app/kintone-utilities-react';
 import { Alert, AlertTitle, Dialog, DialogContent, DialogTitle } from '@mui/material';
@@ -14,7 +14,7 @@ import { FC, useState } from 'react';
 
 const ROOT_ID = `🐸${config.id}-root`;
 
-const Component: FC<{ pluginConfig: Plugin.Config }> = ({ pluginConfig }) => {
+const Component: FC<{ pluginConfig: PluginConfig }> = ({ pluginConfig }) => {
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
@@ -54,7 +54,7 @@ manager.add(['app.record.index.show', 'app.record.detail.show'], async (event) =
   componentManager.debug = !isProd;
 
   componentManager.renderComponent({
-    elementId: ROOT_ID,
+    id: ROOT_ID,
     component: (
       <Provider store={store}>
         <ThemeProvider>
