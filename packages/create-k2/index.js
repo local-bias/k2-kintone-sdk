@@ -13,14 +13,18 @@ async function main() {
       {
         type: 'text',
         name: 'projectName',
-        message: 'What is your project name?',
+        message: '✨ プロジェクト(フォルダ)名を入力してください:',
         initial: 'k2-app',
       },
       {
-        type: 'text',
+        type: 'select',
         name: 'template',
-        message: 'GitHub repository (owner/repo/subdirectory):',
-        initial: 'local-bias/k2-kintone-sdk/templates/default',
+        message: '📦 テンプレートを選択してください:',
+        choices: [
+          { title: 'app', value: 'local-bias/k2-kintone-sdk/templates/default' },
+          // { title: 'plugin', value: 'local-bias/k2-kintone-sdk/templates/plugin/default' },
+          { title: 'plugin min', value: 'local-bias/k2-kintone-sdk/templates/plugin/min' },
+        ],
       },
     ]);
 
@@ -46,9 +50,9 @@ async function main() {
 
     console.log(
       chalk.green(`
-🎉 Successfully created project ${projectName}
+🎉 ${projectName}が作成されました
 
-To get started:
+🏃 次のステップ:
 cd ${projectName}
 npm install
     `)
