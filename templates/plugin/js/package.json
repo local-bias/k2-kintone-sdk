@@ -1,0 +1,17 @@
+{
+  "name": "k2-app",
+  "version": "0.1.0",
+  "author": "",
+  "main": "index.js",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "scripts": {
+    "init": "plugin init && plugin genkey",
+    "dev": "plugin dev",
+    "build": "plugin build && plugin zip"
+  },
+  "devDependencies": {
+    "@konomi-app/k2": "^1.7.7"
+  }
+}
