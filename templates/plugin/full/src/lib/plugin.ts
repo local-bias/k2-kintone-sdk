@@ -4,6 +4,10 @@ import { z } from 'zod';
 import { isProd, PLUGIN_ID } from './global';
 
 export const PluginConditionV1Schema = z.object({
+  /**
+   * プラグイン設定を一意に識別するためのID
+   * 設定の並び替えに使用されます
+   */
   id: z.string(),
   memo: z.string(),
   fields: z.array(z.string()),
@@ -31,8 +35,13 @@ export type PluginCondition = PluginConfig['conditions'][number];
 /** 🔌 過去全てのバージョンを含むプラグインの設定情報 */
 type AnyPluginConfig = PluginConfigV1; // | PluginConfigV2 | ...;
 
-export const validatePluginCondition = (condition: unknown): PluginCondition => {
-  return PluginConditionV1Schema.parse(condition);
+export const validatePluginCondition = (condition: unknown): boolean => {
+  try {
+    PluginConditionV1Schema.parse(condition);
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
 
 export const getNewCondition = (): PluginCondition => ({
