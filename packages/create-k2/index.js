@@ -24,7 +24,10 @@ program
 
 async function main() {
   try {
-    let projectName, template;
+    /** @type { string | undefined } */
+    let projectName;
+    /** @type { string | undefined } */
+    let template;
 
     if (program.args[0] && program.opts().template) {
       // CLIオプション使用時
@@ -48,6 +51,11 @@ async function main() {
       ]);
       projectName = response.projectName;
       template = response.template;
+    }
+
+    if (!projectName) {
+      console.error(chalk.red('Error: Project name is required'));
+      process.exit(1);
     }
 
     const targetDir = path.join(process.cwd(), projectName);
@@ -86,10 +94,10 @@ npm install
 
 /**
  * @param { keyof TEMPLATES } templateType
- * @returns { typeof TEMPLATES[keyof TEMPLATES] }
+ * @returns { string }
  */
 function getTemplateFromOption(templateType) {
-  return TEMPLATES[templateType] || TEMPLATES['app'];
+  return (TEMPLATES[templateType] ?? TEMPLATES['app']).repo;
 }
 
 main();
