@@ -5,8 +5,10 @@
 
 const rootElement = document.getElementById('plugin-content');
 if (!rootElement) {
-  alert('JavaScriptを適用するためのHTML要素が見つかりませんでした。');
-  return;
+  const message =
+    'JavaScriptを適用するためのHTML要素が見つかりませんでした。src/contents/config.htmlを確認してください。';
+  alert(message);
+  throw new Error(message);
 }
 const element = document.createElement('div');
 element.textContent = 'このテキストはJavaScriptによって追加されました。';
