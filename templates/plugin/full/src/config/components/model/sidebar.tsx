@@ -1,6 +1,6 @@
 import { conditionsAtom, selectedConditionIdAtom } from '@/config/states/plugin';
 import { t } from '@/lib/i18n';
-import { getNewCondition, PluginCondition, validatePluginCondition } from '@/lib/plugin';
+import { getNewCondition, PluginCondition, isPluginConditionMet } from '@/lib/plugin';
 import { BundledSidebar } from '@konomi-app/kintone-utilities-react';
 import { useAtom } from 'jotai';
 import { useSnackbar } from 'notistack';
@@ -50,7 +50,7 @@ const Sidebar: FC = () => {
         },
         onPasteValidation: (condition) => {
           try {
-            validatePluginCondition(condition);
+            isPluginConditionMet(condition);
           } catch (error) {
             return false;
           }

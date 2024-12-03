@@ -35,13 +35,31 @@ export type PluginCondition = PluginConfig['conditions'][number];
 /** 🔌 過去全てのバージョンを含むプラグインの設定情報 */
 type AnyPluginConfig = PluginConfigV1; // | PluginConfigV2 | ...;
 
-export const validatePluginCondition = (condition: unknown): boolean => {
+/**
+ * プラグインの設定情報が、最新の設定情報の形式に準拠しているか検証します
+ *
+ * @param condition - 検証する条件オブジェクト
+ * @returns プラグインの設定情報が最新の形式に準拠している場合は`true`、そうでない場合は`false`
+ */
+export const isPluginConditionMet = (condition: unknown): boolean => {
   try {
     PluginConditionV1Schema.parse(condition);
     return true;
   } catch (error) {
     return false;
   }
+};
+
+/**
+ * プラグインの設定情報が、プラグインの利用条件を満たしているか検証します
+ *
+ * この条件を満たさない場合、設定情報は無効となります。
+ *
+ * @param condition - 検証する条件オブジェクト
+ * @returns プラグインの設定情報が利用条件を満たしている場合は`true`、そうでない場合は`false`
+ */
+export const isUsagePluginConditionMet = (condition: PluginCondition) => {
+  return !!condition.memo;
 };
 
 export const getNewCondition = (): PluginCondition => ({
