@@ -1,48 +1,77 @@
 import { PluginCondition } from '@/lib/plugin';
 import { store } from '@/lib/store';
+import { cn } from '@/lib/utils';
+import { css } from '@emotion/css';
+import { Fab } from '@mui/material';
+import JsonView from '@uiw/react-json-view';
 import { Provider, useAtomValue } from 'jotai';
-import { type FC } from 'react';
+import { memo, useState, type FC } from 'react';
 import { pluginConfigAtom } from '../public-state';
-import { kintoneEventAtom } from './state';
 
 const Condition: FC<{ condition: PluginCondition }> = ({ condition }) => {
-  const id = condition.id;
-
   return (
     <div>
-      <div>
-        <pre>{JSON.stringify({ id, condition }, null, 2)}</pre>
-      </div>
+      <details>
+        <summary>
+          <div className='text-sm text-gray-800 font-bold'>{condition.id}</div>
+        </summary>
+        <JsonView value={{ ...condition }} />
+      </details>
     </div>
   );
 };
 
-const Component: FC = () => {
+const DebugContent: FC = memo(() => {
   const pluginConfig = useAtomValue(pluginConfigAtom);
-  const kintoneEvent = useAtomValue(kintoneEventAtom);
-  console.log({ pluginConfig });
+  return (
+    <div>
+      {pluginConfig.conditions.map((condition) => (
+        <Condition key={condition.id} condition={condition} />
+      ))}
+    </div>
+  );
+});
+
+const DebugContainer: FC = () => {
+  const [shown, setShown] = useState(false);
+
+  const onButtonClick = () => {
+    setShown((prev) => !prev);
+  };
 
   return (
     <Provider store={store}>
-      <div className='fixed left-full top-0 z-20 w-[25dvw] box-border p-4 bg-gray-900 text-white min-h-[125dvh] overflow-auto'>
-        <div className='flex gap-2 sticky top-0 bg-gray-900 border-b'>
-          <div className='text-3xl'>🐛</div>
-          <div className='mb-4 text-sm text-green-300 font-bold'>
-            Plugin Debug Menu
-            <div className='text-xs'>(Not displayed in production)</div>
+      <div className='🐸'>
+        <div
+          className={cn(
+            'transition-all opacity-100 fixed right-0 top-0 z-40 bg-white/60 backdrop-blur-sm text-gray-800 p-4 overflow-auto h-screen',
+            {
+              'opacity-0 pointer-events-none': !shown,
+            },
+            css`
+              --w-rjv-background-color: transparent;
+            `
+          )}
+        >
+          <div className='box-border p-4 overflow-auto'>
+            <div className='mb-4 text-sm text-green-800 font-bold'>
+              Plugin Debug Menu
+              <span className='text-xs'>(Not displayed in production)</span>
+            </div>
+            <DebugContent />
           </div>
         </div>
-        <pre>
-          {JSON.stringify({
-            kintoneEvent,
-          })}
-        </pre>
-        {pluginConfig.conditions.map((condition) => (
-          <Condition key={condition.id} condition={condition} />
-        ))}
+        <Fab
+          onClick={onButtonClick}
+          color='warning'
+          size='small'
+          className='fixed right-3 bottom-3 z-50'
+        >
+          🐛
+        </Fab>
       </div>
     </Provider>
   );
 };
 
-export default Component;
+export default DebugContainer;
