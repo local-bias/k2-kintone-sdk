@@ -1,0 +1,71 @@
+{
+  "name": "@konomi-app/k2",
+  "version": "1.8.0",
+  "description": "kintone sdk",
+  "main": "./dist/index.js",
+  "type": "module",
+  "bin": {
+    "k2": "./dist/index.js",
+    "plugin": "./dist/plugin.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "types",
+    "types.d.ts"
+  ],
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "rmdir /s /q dist & tsc",
+    "dev": "tsc -w",
+    "watch": "tsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@kintone/plugin-packer": "^8",
+    "@typescript-eslint/eslint-plugin": "^7",
+    "@typescript-eslint/parser": "^7",
+    "archiver": "^7",
+    "chalk": "^5",
+    "chokidar": "^4",
+    "commander": "^12",
+    "css-loader": "^7",
+    "cssnano": "^7",
+    "deepmerge": "^4",
+    "dotenv": "^16",
+    "esbuild": "^0.24",
+    "eslint": "^8",
+    "eslint-config-prettier": "^9",
+    "eslint-plugin-import": "^2",
+    "eslint-plugin-n": "^17",
+    "eslint-plugin-promise": "^6",
+    "eslint-plugin-react": "^7",
+    "express": "^4",
+    "fs-extra": "^11",
+    "glob": "^11.0.0",
+    "html-minifier": "^4",
+    "mini-css-extract-plugin": "^2",
+    "postcss": "^8",
+    "remeda": "^2",
+    "sass": "^1",
+    "sass-loader": "^16",
+    "style-loader": "^4",
+    "tailwindcss": "^3",
+    "terser-webpack-plugin": "^5",
+    "tiny-invariant": "^1",
+    "ts-loader": "^9",
+    "tsconfig-paths-webpack-plugin": "^4",
+    "tsup": "^8",
+    "webpack": "^5"
+  },
+  "devDependencies": {
+    "@types/archiver": "*",
+    "@types/eslint": "^8",
+    "@types/express": "^5",
+    "@types/fs-extra": "*",
+    "@types/html-minifier": "^4",
+    "typescript": "*"
+  }
+}
