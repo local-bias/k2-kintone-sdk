@@ -15,7 +15,6 @@
     "types.d.ts"
   ],
   "scripts": {
-    "prepare": "npm run build",
     "build": "rmdir /s /q dist & tsc",
     "dev": "tsc -w",
     "watch": "tsc -w"
