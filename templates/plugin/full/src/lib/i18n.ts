@@ -139,16 +139,20 @@ export type Language = keyof typeof ui;
 
 export const defaultLang = 'ja' satisfies Language;
 
+const isSupportedLang = (lang: string): lang is Language => lang in ui;
+
 /**
  * 指定された言語に対応する翻訳関数を返します。
  * @param lang - 言語のキー
  * @returns 指定された言語に対応する翻訳関数
  */
-export function useTranslations(lang: keyof typeof ui) {
+export function useTranslations(lang: string = defaultLang) {
+  const validLang = isSupportedLang(lang) ? lang : defaultLang;
+
   return function t(key: keyof (typeof ui)[typeof defaultLang]): string {
     /* eslint @typescript-eslint/ban-ts-comment: 0 */
     // @ts-ignore デフォルト言語以外の設定が不十分な場合は、デフォルト言語の設定を使用します
-    return ui[lang][key] ?? ui[defaultLang][key];
+    return ui[validLang][key] ?? ui[defaultLang][key];
   };
 }
 
