@@ -1,6 +1,4 @@
-import { createTheme } from '@mui/material';
 import { LANGUAGE } from './global';
-import { enUS, esES, jaJP, zhCN } from '@mui/material/locale';
 
 export const ui = {
   ja: {
@@ -133,6 +131,7 @@ export const ui = {
     'desktop.dialogtrigger.content': '单击以查看事件详细信息',
     'desktop.dialog.title': '插件的配置信息',
   },
+  'zh-TW': {},
 } as const;
 
 export type Language = keyof typeof ui;
@@ -149,42 +148,17 @@ const isSupportedLang = (lang: string): lang is Language => lang in ui;
 export function useTranslations(lang: string = defaultLang) {
   const validLang = isSupportedLang(lang) ? lang : defaultLang;
 
-  return function t(key: keyof (typeof ui)[typeof defaultLang]): string {
+  return function t(key: keyof (typeof ui)[typeof defaultLang], ...args: string[]): string {
     /* eslint @typescript-eslint/ban-ts-comment: 0 */
     // @ts-ignore デフォルト言語以外の設定が不十分な場合は、デフォルト言語の設定を使用します
-    return ui[validLang][key] ?? ui[defaultLang][key];
+    let translation: string = ui[validLang][key] ?? ui[defaultLang][key];
+
+    args.forEach((arg, index) => {
+      translation = translation.replace(`{${index}}`, arg);
+    });
+
+    return translation;
   };
 }
 
 export const t = useTranslations(LANGUAGE as Language);
-
-const getMUILang = () => {
-  switch (LANGUAGE) {
-    case 'en': {
-      return enUS;
-    }
-    case 'zh': {
-      return zhCN;
-    }
-    case 'es': {
-      return esES;
-    }
-    case 'ja':
-    default: {
-      return jaJP;
-    }
-  }
-};
-
-export const getMUITheme = () => {
-  return createTheme(
-    {
-      palette: {
-        primary: {
-          main: '#3498db',
-        },
-      },
-    },
-    getMUILang()
-  );
-};
