@@ -1,14 +1,14 @@
+import { PLUGIN_NAME } from '@/lib/constants';
 import { t } from '@/lib/i18n';
 import { migrateConfig } from '@/lib/plugin';
-import { PLUGIN_NAME } from '@/lib/constants';
 import { onFileLoad, storePluginConfig } from '@konomi-app/kintone-utilities';
 import { useAtomCallback } from 'jotai/utils';
 import { useSnackbar } from 'notistack';
-import { ChangeEventHandler, useCallback } from 'react';
+import { ChangeEventHandler, ReactNode, useCallback } from 'react';
 import invariant from 'tiny-invariant';
 import { loadingAtom, pluginConfigAtom } from '../states/plugin';
 
-export const useSavePluginConfig = (actionComponent: JSX.Element) => {
+export const useSavePluginConfig = (actionComponent: ReactNode) => {
   const { enqueueSnackbar } = useSnackbar();
 
   return useAtomCallback(
