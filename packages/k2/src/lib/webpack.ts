@@ -15,6 +15,12 @@ export const buildWithWebpack = async (props: {
   const exclude = /node_modules/;
   const styleLoader = MiniCssExtractPlugin.loader;
 
+  const tsConfigPath = path.join(cwd(), 'tsconfig.json');
+
+  console.group(chalk.blue('🚀 Building with Webpack...'));
+  console.log('🔧 tsconfig.json path:', tsConfigPath);
+  console.groupEnd();
+
   return new Promise<void>((resolve, reject) => {
     webpack(
       {
@@ -26,7 +32,7 @@ export const buildWithWebpack = async (props: {
           fallback: {
             path: false,
           },
-          plugins: [new TsconfigPathsPlugin({ configFile: path.join(cwd(), 'tsconfig.json') })],
+          plugins: [new TsconfigPathsPlugin({ configFile: tsConfigPath })],
         },
         cache: { type: 'filesystem' },
         output: { filename: '[name].js', path: path.resolve(outDir) },
