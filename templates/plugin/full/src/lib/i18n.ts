@@ -161,4 +161,4 @@ export function useTranslations(lang: string = defaultLang) {
   };
 }
 
-export const t = useTranslations(LANGUAGE as Language);
+export const t = useTranslations(LANGUAGE);
