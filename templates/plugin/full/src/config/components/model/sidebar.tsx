@@ -1,4 +1,4 @@
-import { conditionsAtom, selectedConditionIdAtom } from '@/config/states/plugin';
+import { pluginConditionsAtom, selectedConditionIdAtom } from '@/config/states/plugin';
 import { t } from '@/lib/i18n';
 import { getNewCondition, PluginCondition, isPluginConditionMet } from '@/lib/plugin';
 import { BundledSidebar } from '@konomi-app/kintone-utilities-react';
@@ -8,7 +8,7 @@ import { FC, useCallback } from 'react';
 
 const Sidebar: FC = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const [conditions, setConditions] = useAtom(conditionsAtom);
+  const [conditions, setConditions] = useAtom(pluginConditionsAtom);
   const [selectedConditionId, setSelectedConditionId] = useAtom(selectedConditionIdAtom);
   const label = useCallback((params: { condition: PluginCondition; index: number }) => {
     const { condition, index } = params;

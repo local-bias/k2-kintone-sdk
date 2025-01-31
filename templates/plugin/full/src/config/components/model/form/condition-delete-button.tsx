@@ -4,7 +4,7 @@ import { useAtomCallback } from 'jotai/utils';
 import { useSnackbar } from 'notistack';
 import { FC, useCallback } from 'react';
 import {
-  conditionsAtom,
+  pluginConditionsAtom,
   conditionsLengthAtom,
   selectedConditionIdAtom,
 } from '../../../states/plugin';
@@ -16,7 +16,7 @@ const Component: FC = () => {
     useCallback(
       async (get, set) => {
         const selectedConditionId = get(selectedConditionIdAtom);
-        set(conditionsAtom, (prev) =>
+        set(pluginConditionsAtom, (prev) =>
           prev.filter((condition) => condition.id !== selectedConditionId)
         );
         set(selectedConditionIdAtom, null);
