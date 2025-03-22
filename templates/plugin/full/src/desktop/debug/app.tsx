@@ -1,11 +1,11 @@
-import { PluginCondition } from '@/lib/plugin';
 import { store } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { PluginCondition } from '@/schema/plugin-config';
 import { css } from '@emotion/css';
 import { Fab } from '@mui/material';
 import JsonView from '@uiw/react-json-view';
 import { Provider, useAtomValue } from 'jotai';
-import { memo, useState, type FC } from 'react';
+import { useState, type FC } from 'react';
 import { pluginConfigAtom } from '../public-state';
 
 const Condition: FC<{ condition: PluginCondition }> = ({ condition }) => {
@@ -21,7 +21,7 @@ const Condition: FC<{ condition: PluginCondition }> = ({ condition }) => {
   );
 };
 
-const DebugContent: FC = memo(() => {
+const DebugContent: FC = () => {
   const pluginConfig = useAtomValue(pluginConfigAtom);
   return (
     <div>
@@ -30,7 +30,7 @@ const DebugContent: FC = memo(() => {
       ))}
     </div>
   );
-});
+};
 
 const DebugContainer: FC = () => {
   const [shown, setShown] = useState(false);
