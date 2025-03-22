@@ -1,9 +1,5 @@
-import {
-  PluginCommonConfig,
-  PluginCondition,
-  PluginConfig,
-  restorePluginConfig,
-} from '@/lib/plugin';
+import { restorePluginConfig } from '@/lib/plugin';
+import { PluginCommonConfig, PluginCondition, PluginConfig } from '@/schema/plugin-config';
 import { produce } from 'immer';
 import { atom, SetStateAction } from 'jotai';
 import { atomWithReset } from 'jotai/utils';
