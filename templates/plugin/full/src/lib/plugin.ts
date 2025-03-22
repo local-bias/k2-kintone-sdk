@@ -1,39 +1,12 @@
+import {
+  AnyPluginConfig,
+  LatestPluginConditionSchema,
+  PluginCondition,
+  PluginConfig,
+} from '@/schema/plugin-config';
 import { restorePluginConfig as restore } from '@konomi-app/kintone-utilities';
 import { nanoid } from 'nanoid';
-import { z } from 'zod';
 import { isProd, PLUGIN_ID } from './global';
-
-export const PluginConditionV1Schema = z.object({
-  /**
-   * プラグイン設定を一意に識別するためのID
-   * 設定の並び替えに使用されます
-   */
-  id: z.string(),
-  memo: z.string(),
-  fields: z.array(z.string()),
-  isSampleUIShown: z.boolean(),
-});
-export const PluginConfigV1Schema = z.object({
-  version: z.literal(1),
-  common: z.object({
-    memo: z.string(),
-    fields: z.array(z.string()),
-  }),
-  conditions: z.array(PluginConditionV1Schema),
-});
-type PluginConfigV1 = z.infer<typeof PluginConfigV1Schema>;
-
-/** 🔌 プラグインがアプリ単位で保存する設定情報 */
-export type PluginConfig = PluginConfigV1;
-
-/** 🔌 プラグインの共通設定 */
-export type PluginCommonConfig = PluginConfig['common'];
-
-/** 🔌 プラグインの詳細設定 */
-export type PluginCondition = PluginConfig['conditions'][number];
-
-/** 🔌 過去全てのバージョンを含むプラグインの設定情報 */
-type AnyPluginConfig = PluginConfigV1; // | PluginConfigV2 | ...;
 
 /**
  * プラグインの設定情報が、最新の設定情報の形式に準拠しているか検証します
@@ -42,12 +15,7 @@ type AnyPluginConfig = PluginConfigV1; // | PluginConfigV2 | ...;
  * @returns プラグインの設定情報が最新の形式に準拠している場合は`true`、そうでない場合は`false`
  */
 export const isPluginConditionMet = (condition: unknown): boolean => {
-  try {
-    PluginConditionV1Schema.parse(condition);
-    return true;
-  } catch (error) {
-    return false;
-  }
+  return LatestPluginConditionSchema.safeParse(condition).success;
 };
 
 /**
@@ -91,13 +59,16 @@ export const createConfig = (): PluginConfig => ({
 export const migrateConfig = (anyConfig: AnyPluginConfig): PluginConfig => {
   const { version } = anyConfig;
   switch (version) {
-    case undefined:
+    case undefined: {
       return migrateConfig({ ...anyConfig, version: 1 });
+    }
     case 1:
-    default: // `default` -> `config.js`と`desktop.js`のバージョンが一致していない場合に通る可能性があるため必要
+    default: {
+      // `default` -> `config.js`と`desktop.js`のバージョンが一致していない場合に通る可能性があるため必要
       // もし新しいバージョンを追加したらここに追加する
       // return migrateConfig({ version: 2, ...anyConfig });
       return anyConfig;
+    }
   }
 };
 
