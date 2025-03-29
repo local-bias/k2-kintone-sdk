@@ -1,6 +1,6 @@
 import { PLUGIN_NAME } from '@/lib/constants';
 import { t } from '@/lib/i18n';
-import { migrateConfig, restorePluginConfig } from '@/lib/plugin';
+import { createConfig, migrateConfig, restorePluginConfig } from '@/lib/plugin';
 import { PluginCommonConfig, PluginCondition, PluginConfig } from '@/schema/plugin-config';
 import { onFileLoad, storePluginConfig } from '@konomi-app/kintone-utilities';
 import { produce } from 'immer';
@@ -12,6 +12,11 @@ import invariant from 'tiny-invariant';
 import { loadingEndAtom, loadingStartAtom } from './ui';
 
 export const pluginConfigAtom = atom<PluginConfig>(restorePluginConfig());
+
+export const handlePluginConfigResetAtom = atom(null, (_, set) => {
+  set(pluginConfigAtom, createConfig());
+  enqueueSnackbar(t('config.toast.reset'), { variant: 'success' });
+});
 
 // 📦 optics-tsを使用した際にwebpackの型推論が機能しない場合があるため、一時的に代替する関数を使用
 // export const pluginConditionsAtom = focusAtom(pluginConfigAtom, (s) => s.prop('conditions'));
