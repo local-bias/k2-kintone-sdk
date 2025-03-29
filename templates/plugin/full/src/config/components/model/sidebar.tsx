@@ -32,7 +32,6 @@ const Sidebar: FC = () => {
   return (
     <BundledSidebar
       conditions={conditions}
-      // @ts-ignore
       setConditions={setConditions}
       getNewCondition={getNewCondition}
       labelComponent={label}
@@ -49,14 +48,7 @@ const Sidebar: FC = () => {
           enqueueSnackbar('設定情報を貼り付けました', { variant: 'success' });
           return null;
         },
-        onPasteValidation: (condition) => {
-          try {
-            isPluginConditionMet(condition);
-          } catch (error) {
-            return false;
-          }
-          return true;
-        },
+        onPasteValidation: (condition) => isPluginConditionMet(condition),
         onPasteValidationError: () => {
           enqueueSnackbar('設定情報の形式が正しくありません', { variant: 'error' });
         },
