@@ -7,7 +7,7 @@ import {
   PluginFormTitle,
 } from '@konomi-app/kintone-utilities-react';
 import { useAtomValue } from 'jotai';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import CommonSettings from './common';
 import DeleteButton from './condition-delete-button';
 import FieldsForm from './form-fields';
