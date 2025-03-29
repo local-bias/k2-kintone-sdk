@@ -1,3 +1,8 @@
+import {
+  exportPluginConfigAtom,
+  importPluginConfigAtom,
+  updatePluginConfig,
+} from '@/config/states/plugin';
 import { loadingAtom } from '@/config/states/ui';
 import { t } from '@/lib/i18n';
 import {
@@ -10,11 +15,6 @@ import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore
 import { Button, CircularProgress } from '@mui/material';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { FC, useCallback } from 'react';
-import {
-  exportPluginConfigAtom,
-  importPluginConfigAtom,
-  updatePluginConfig,
-} from '../../../states/plugin';
 import ResetButton from './reset-button';
 
 type Props = {
