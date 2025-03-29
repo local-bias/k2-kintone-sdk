@@ -1,41 +1,16 @@
 import { PluginConditionDeleteButton } from '@konomi-app/kintone-utilities-react';
-import { useAtomValue } from 'jotai';
-import { useAtomCallback } from 'jotai/utils';
-import { useSnackbar } from 'notistack';
-import { FC, useCallback } from 'react';
+import { useAtomValue, useSetAtom } from 'jotai';
 import {
-  pluginConditionsAtom,
-  conditionsLengthAtom,
-  selectedConditionIdAtom,
+  handlePluginConditionDeleteAtom,
+  isConditionDeleteButtonShownAtom,
 } from '../../../states/plugin';
 
-const Component: FC = () => {
-  const { enqueueSnackbar } = useSnackbar();
-
-  const onClick = useAtomCallback(
-    useCallback(
-      async (get, set) => {
-        const selectedConditionId = get(selectedConditionIdAtom);
-        set(pluginConditionsAtom, (prev) =>
-          prev.filter((condition) => condition.id !== selectedConditionId)
-        );
-        set(selectedConditionIdAtom, null);
-        enqueueSnackbar('設定を削除しました', { variant: 'success' });
-      },
-      [enqueueSnackbar]
-    )
-  );
-
+function ConditionDeleteButtonContent() {
+  const onClick = useSetAtom(handlePluginConditionDeleteAtom);
   return <PluginConditionDeleteButton {...{ onClick }} />;
-};
+}
 
-const Container: FC = () => {
-  const conditionsLength = useAtomValue(conditionsLengthAtom);
-
-  if (conditionsLength < 2) {
-    return null;
-  }
-  return <Component />;
-};
-
-export default Container;
+export default function ConditionDeleteButton() {
+  const isShown = useAtomValue(isConditionDeleteButtonShownAtom);
+  return isShown ? <ConditionDeleteButtonContent /> : null;
+}

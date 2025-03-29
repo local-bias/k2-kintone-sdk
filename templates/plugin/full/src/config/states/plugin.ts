@@ -79,6 +79,11 @@ export const getCommonPropertyAtom = <T extends keyof PluginCommonConfig>(proper
     }
   );
 
+export const isConditionDeleteButtonShownAtom = atom((get) => {
+  const conditions = get(pluginConditionsAtom);
+  return conditions.length > 1;
+});
+
 // 📦 optics-tsを使用した際にwebpackの型推論が機能しない場合があるため、一時的に代替する関数を使用
 // export const getConditionPropertyAtom = <T extends keyof PluginCondition>(property: T) =>
 //   focusAtom(selectedConditionAtom, (s) => s.prop(property)) as PrimitiveAtom<PluginCondition[T]>;
@@ -95,6 +100,15 @@ export const getConditionPropertyAtom = <T extends keyof PluginCondition>(proper
       );
     }
   );
+
+export const handlePluginConditionDeleteAtom = atom(null, (get, set) => {
+  const selectedConditionId = get(selectedConditionIdAtom);
+  set(pluginConditionsAtom, (prev) =>
+    prev.filter((condition) => condition.id !== selectedConditionId)
+  );
+  set(selectedConditionIdAtom, null);
+  enqueueSnackbar('設定を削除しました', { variant: 'success' });
+});
 
 export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNode) => {
   try {
