@@ -1,4 +1,3 @@
-import { usePluginStorage, useSavePluginConfig } from '@/config/hooks/use-plugin-storage';
 import { t } from '@/lib/i18n';
 import {
   PluginConfigExportButton,
@@ -8,9 +7,14 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore';
 import { Button, CircularProgress } from '@mui/material';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { FC, useCallback } from 'react';
-import { loadingAtom } from '../../../states/plugin';
+import {
+  exportPluginConfigAtom,
+  importPluginConfigAtom,
+  loadingAtom,
+  updatePluginConfig,
+} from '../../../states/plugin';
 import ResetButton from './reset-button';
 
 type Props = {
@@ -19,18 +23,20 @@ type Props = {
 
 const SaveButton: FC<Pick<Props, 'backToPluginList'>> = ({ backToPluginList }) => {
   const loading = useAtomValue(loadingAtom);
-  const savePluginConfig = useSavePluginConfig(
-    <Button color='inherit' size='small' variant='outlined' onClick={backToPluginList}>
-      {t('config.button.return')}
-    </Button>
-  );
+  const savePluginConfig = useSetAtom(updatePluginConfig);
 
   return (
     <Button
       variant='contained'
       color='primary'
       disabled={loading}
-      onClick={savePluginConfig}
+      onClick={() =>
+        savePluginConfig(
+          <Button color='inherit' size='small' variant='outlined' onClick={backToPluginList}>
+            {t('config.button.return')}
+          </Button>
+        )
+      }
       startIcon={loading ? <CircularProgress color='inherit' size={20} /> : <SaveIcon />}
     >
       {t('config.button.save')}
@@ -40,7 +46,8 @@ const SaveButton: FC<Pick<Props, 'backToPluginList'>> = ({ backToPluginList }) =
 
 const Component: FC<Props> = ({ backToPluginList }) => {
   const loading = useAtomValue(loadingAtom);
-  const { exportStorage, importStorage } = usePluginStorage();
+  const importPluginConfig = useSetAtom(importPluginConfigAtom);
+  const exportPluginConfig = useSetAtom(exportPluginConfigAtom);
 
   return (
     <>
@@ -59,8 +66,8 @@ const Component: FC<Props> = ({ backToPluginList }) => {
         </Button>
       </div>
       <div className='flex items-center gap-4'>
-        <PluginConfigExportButton loading={loading} onExportButtonClick={exportStorage} />
-        <PluginConfigImportButton onImportButtonClick={importStorage} loading={loading} />
+        <PluginConfigExportButton loading={loading} onExportButtonClick={exportPluginConfig} />
+        <PluginConfigImportButton loading={loading} onImportButtonClick={importPluginConfig} />
         <ResetButton />
       </div>
     </>
