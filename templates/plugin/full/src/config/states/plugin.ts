@@ -9,9 +9,9 @@ import { atomWithReset } from 'jotai/utils';
 import { enqueueSnackbar } from 'notistack';
 import { ChangeEvent, ReactNode } from 'react';
 import invariant from 'tiny-invariant';
+import { loadingEndAtom, loadingStartAtom } from './ui';
 
 export const pluginConfigAtom = atom<PluginConfig>(restorePluginConfig());
-export const loadingAtom = atom(false);
 
 // 📦 optics-tsを使用した際にwebpackの型推論が機能しない場合があるため、一時的に代替する関数を使用
 // export const pluginConditionsAtom = focusAtom(pluginConfigAtom, (s) => s.prop('conditions'));
@@ -98,7 +98,7 @@ export const getConditionPropertyAtom = <T extends keyof PluginCondition>(proper
 
 export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNode) => {
   try {
-    set(loadingAtom, true);
+    set(loadingStartAtom);
     const pluginConfig = get(pluginConfigAtom);
     storePluginConfig(pluginConfig, {
       callback: () => true,
@@ -110,7 +110,7 @@ export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNo
       action: actionComponent,
     });
   } finally {
-    set(loadingAtom, false);
+    set(loadingEndAtom);
   }
 });
 
@@ -121,7 +121,7 @@ export const importPluginConfigAtom = atom(
   null,
   async (_, set, event: ChangeEvent<HTMLInputElement>) => {
     try {
-      set(loadingAtom, true);
+      set(loadingStartAtom);
       const { files } = event.target;
       invariant(files?.length, 'ファイルが見つかりませんでした');
       const [file] = Array.from(files);
@@ -133,7 +133,7 @@ export const importPluginConfigAtom = atom(
       enqueueSnackbar(t('config.error.import'), { variant: 'error' });
       throw error;
     } finally {
-      set(loadingAtom, false);
+      set(loadingEndAtom);
     }
   }
 );
@@ -143,7 +143,7 @@ export const importPluginConfigAtom = atom(
  */
 export const exportPluginConfigAtom = atom(null, (get, set) => {
   try {
-    set(loadingAtom, true);
+    set(loadingStartAtom);
     const pluginConfig = get(pluginConfigAtom);
     const blob = new Blob([JSON.stringify(pluginConfig, null)], {
       type: 'application/json',
@@ -160,6 +160,6 @@ export const exportPluginConfigAtom = atom(null, (get, set) => {
     enqueueSnackbar(t('config.error.export'), { variant: 'error' });
     throw error;
   } finally {
-    set(loadingAtom, false);
+    set(loadingEndAtom);
   }
 });
