@@ -1,3 +1,4 @@
+import { loadingAtom } from '@/config/states/ui';
 import { t } from '@/lib/i18n';
 import {
   PluginConfigExportButton,
@@ -12,7 +13,6 @@ import { FC, useCallback } from 'react';
 import {
   exportPluginConfigAtom,
   importPluginConfigAtom,
-  loadingAtom,
   updatePluginConfig,
 } from '../../../states/plugin';
 import ResetButton from './reset-button';
