@@ -1,8 +1,14 @@
-import { restorePluginConfig } from '@/lib/plugin';
+import { PLUGIN_NAME } from '@/lib/constants';
+import { t } from '@/lib/i18n';
+import { migrateConfig, restorePluginConfig } from '@/lib/plugin';
 import { PluginCommonConfig, PluginCondition, PluginConfig } from '@/schema/plugin-config';
+import { onFileLoad, storePluginConfig } from '@konomi-app/kintone-utilities';
 import { produce } from 'immer';
 import { atom, SetStateAction } from 'jotai';
 import { atomWithReset } from 'jotai/utils';
+import { enqueueSnackbar } from 'notistack';
+import { ChangeEvent, ReactNode } from 'react';
+import invariant from 'tiny-invariant';
 
 export const pluginConfigAtom = atom<PluginConfig>(restorePluginConfig());
 export const loadingAtom = atom(false);
@@ -89,3 +95,71 @@ export const getConditionPropertyAtom = <T extends keyof PluginCondition>(proper
       );
     }
   );
+
+export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNode) => {
+  try {
+    set(loadingAtom, true);
+    const pluginConfig = get(pluginConfigAtom);
+    storePluginConfig(pluginConfig, {
+      callback: () => true,
+      flatProperties: ['conditions'],
+      debug: true,
+    });
+    enqueueSnackbar(t('config.toast.save'), {
+      variant: 'success',
+      action: actionComponent,
+    });
+  } finally {
+    set(loadingAtom, false);
+  }
+});
+
+/**
+ * jsonファイルを読み込み、プラグインの設定情報をインポートします
+ */
+export const importPluginConfigAtom = atom(
+  null,
+  async (_, set, event: ChangeEvent<HTMLInputElement>) => {
+    try {
+      set(loadingAtom, true);
+      const { files } = event.target;
+      invariant(files?.length, 'ファイルが見つかりませんでした');
+      const [file] = Array.from(files);
+      const fileEvent = await onFileLoad(file!);
+      const text = (fileEvent.target?.result ?? '') as string;
+      set(pluginConfigAtom, migrateConfig(JSON.parse(text)));
+      enqueueSnackbar(t('config.toast.import'), { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar(t('config.error.import'), { variant: 'error' });
+      throw error;
+    } finally {
+      set(loadingAtom, false);
+    }
+  }
+);
+
+/**
+ * プラグインの設定情報をjsonファイルとしてエクスポートします
+ */
+export const exportPluginConfigAtom = atom(null, (get, set) => {
+  try {
+    set(loadingAtom, true);
+    const pluginConfig = get(pluginConfigAtom);
+    const blob = new Blob([JSON.stringify(pluginConfig, null)], {
+      type: 'application/json',
+    });
+    const url = (window.URL || window.webkitURL).createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = `${PLUGIN_NAME}-config.json`;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    enqueueSnackbar(t('config.toast.export'), { variant: 'success' });
+  } catch (error) {
+    enqueueSnackbar(t('config.error.export'), { variant: 'error' });
+    throw error;
+  } finally {
+    set(loadingAtom, false);
+  }
+});
