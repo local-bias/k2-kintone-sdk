@@ -1,13 +1,12 @@
 import chalk from 'chalk';
 import esbuild, { type BuildOptions } from 'esbuild';
-import { getSassPlugin } from './esbuild-sass-plugin.js';
 
 const completeBuildOptions = (params: BuildOptions): BuildOptions => {
   return {
     bundle: true,
     platform: 'browser',
     ...params,
-    plugins: [...(params.plugins ?? []), getSassPlugin()],
+    plugins: [...(params.plugins ?? [])],
   };
 };
 
