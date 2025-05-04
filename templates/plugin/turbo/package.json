@@ -5,7 +5,10 @@
   "license": "MIT",
   "scripts": {
     "init": "plugin init && plugin genkey",
-    "build": "plugin build && plugin zip",
+    "build:css-desktop": "pnpm dlx @tailwindcss/cli -i ./src/styles/desktop.css -o ./.plugin/contents/desktop.css --minify",
+    "build:css-config": "pnpm dlx @tailwindcss/cli -i ./src/styles/config.css -o ./.plugin/contents/config.css --minify",
+    "build:js": "plugin build",
+    "build": "concurrently \"pnpm:build:*\" && plugin zip",
     "standalone": "plugin build && plugin zip --env standalone",
     "dev:js": "plugin dev",
     "dev:css-desktop": "pnpm dlx @tailwindcss/cli -i ./src/styles/desktop.css -o ./.plugin/dev/desktop.css --watch",

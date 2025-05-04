@@ -1,4 +1,4 @@
-import { commonSettingsShownAtom, getConditionPropertyAtom } from '@/config/states/plugin';
+import { isConditionIdUnselectedAtom, getConditionPropertyAtom } from '@/config/states/plugin';
 import { JotaiSwitch, JotaiText } from '@konomi-app/kintone-utilities-jotai';
 import {
   PluginFormDescription,
@@ -35,7 +35,7 @@ const FormContent: FC = () => {
 };
 
 const FormContainer: FC = () => {
-  const commonSettingsShown = useAtomValue(commonSettingsShownAtom);
+  const commonSettingsShown = useAtomValue(isConditionIdUnselectedAtom);
   return commonSettingsShown ? <CommonSettings /> : <FormContent />;
 };
 

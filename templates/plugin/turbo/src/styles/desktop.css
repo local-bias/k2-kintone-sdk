@@ -102,7 +102,7 @@
       @apply rad:w-1 rad:h-1 rad:md:w-2 rad:md:h-2;
     }
     ::-webkit-scrollbar-thumb {
-      @apply rad:rounded-full rad:bg-gray-300;
+      @apply rad:rounded-full rad:bg-foreground/30;
     }
     ::-webkit-scrollbar-track {
       @apply rad:bg-transparent;
