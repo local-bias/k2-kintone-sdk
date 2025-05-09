@@ -1,6 +1,6 @@
 {
   "name": "template",
-  "version": "2.0.1",
+  "version": "0.1.0",
   "author": "ribbit",
   "license": "MIT",
   "scripts": {
@@ -9,11 +9,11 @@
     "build:css-config": "pnpm dlx @tailwindcss/cli -i ./src/styles/config.css -o ./.plugin/contents/config.css --minify",
     "build:js": "plugin build",
     "build": "concurrently \"pnpm:build:*\" && plugin zip",
-    "standalone": "plugin build && plugin zip --env standalone",
+    "standalone": "pnpm run build && plugin zip --env standalone",
     "dev:js": "plugin dev",
     "dev:css-desktop": "pnpm dlx @tailwindcss/cli -i ./src/styles/desktop.css -o ./.plugin/dev/desktop.css --watch",
     "dev:css-config": "pnpm dlx @tailwindcss/cli -i ./src/styles/config.css -o ./.plugin/dev/config.css --watch",
-    "dev": "concurrently \"pnpm dev:js\" \"pnpm dev:css-desktop\" \"pnpm dev:css-config\""
+    "dev": "concurrently \"pnpm:dev:*\""
   },
   "browser": {
     "path": false
@@ -56,16 +56,14 @@
     "react-dom": "^19.0.0",
     "react-error-boundary": "^5.0.0",
     "remeda": "^2.21.3",
-    "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7",
     "tiny-invariant": "^1.3.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@kintone/dts-gen": "^8.1.1",
     "@konomi-app/k2": "^1.8.1",
-    "@konomi-app/prettier-config": "^1.1.2",
     "@repo/eslint-config": "workspace:*",
+    "@repo/tailwindcss": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/cli": "^4.1.4",
     "@types/luxon": "^3.4.2",
