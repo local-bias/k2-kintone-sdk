@@ -128,6 +128,14 @@ declare namespace Plugin {
     en: string;
     /** 簡体字中国語 */
     zh: string;
+    /** 繁体字中国語 */
+    'zh-TW': string;
+    /** スペイン語 */
+    es: string;
+    /** ポルトガル語(ブラジル) */
+    'pt-BR': string;
+    /** タイ語 */
+    th: string;
   };
 
   type Resources = {
