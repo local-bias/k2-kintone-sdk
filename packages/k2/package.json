@@ -17,7 +17,8 @@
   "scripts": {
     "build": "rmdir /s /q dist & tsc",
     "dev": "tsc -w",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "publish": "pnpm run build && pnpm publish --no-git-checks"
   },
   "keywords": [],
   "author": "",
