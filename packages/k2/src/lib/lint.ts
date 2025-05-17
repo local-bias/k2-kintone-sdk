@@ -1,45 +1,18 @@
 import { ESLint } from 'eslint';
+import globals from 'globals';
+import pluginJs from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import pluginReact from 'eslint-plugin-react';
 
 export async function lint() {
   const eslint = new ESLint({
-    baseConfig: {
-      env: {
-        browser: true,
-        es2021: true,
-      },
-      extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/recommended',
-        'plugin:react/recommended',
-        'prettier',
-      ],
-      parser: '@typescript-eslint/parser',
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        project: './tsconfig.json',
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-      plugins: ['@typescript-eslint', 'react'],
-      rules: {
-        'react/prop-types': 'off',
-      },
-      overrides: [
-        {
-          files: ['*.ts', '*.tsx'],
-          rules: {
-            'react/prop-types': 'off',
-          },
-        },
-      ],
-      settings: {
-        react: {
-          version: 'detect',
-        },
-      },
-    },
+    baseConfig: [
+      { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
+      { languageOptions: { globals: globals.browser } },
+      pluginJs.configs.recommended,
+      // ...tseslint.configs.recommended,
+      ...(pluginReact.configs.flat?.recommended ? [pluginReact.configs.flat.recommended] : []),
+    ],
   });
 
   const results = await eslint.lintFiles(['src/**/*.{ts,tsx?}']);
