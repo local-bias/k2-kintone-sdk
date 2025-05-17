@@ -1,6 +1,6 @@
 {
   "name": "create-k2",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "main": "index.js",
   "type": "module",
   "bin": {
@@ -14,8 +14,8 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "chalk": "^5.3.0",
-    "commander": "^12.1.0",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
     "prompts": "^2.4.2",
     "tiged": "^2.12.7"
   }

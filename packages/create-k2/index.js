@@ -13,6 +13,10 @@ const TEMPLATES /** @type { const } */ = {
   'plugin-min': { title: 'plugin min', repo: 'local-bias/k2-kintone-sdk/templates/plugin/min' },
   'plugin-full': { title: 'plugin full', repo: 'local-bias/k2-kintone-sdk/templates/plugin/full' },
   'plugin-js': { title: 'plugin js', repo: 'local-bias/k2-kintone-sdk/templates/plugin/js' },
+  'plugin-turbo': {
+    title: 'plugin turbo',
+    repo: 'local-bias/k2-kintone-sdk/templates/plugin/turbo',
+  },
 };
 
 const program = new Command();
