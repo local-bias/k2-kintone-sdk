@@ -1,11 +1,10 @@
 import { PLUGIN_NAME } from '@/lib/constants';
 import { t } from '@/lib/i18n';
 import { createConfig, migrateConfig, restorePluginConfig } from '@/lib/plugin';
-import { PluginCommonConfig, PluginConfig } from '@/schema/plugin-config';
+import { PluginConfig } from '@/schema/plugin-config';
 import { onFileLoad, storePluginConfig } from '@konomi-app/kintone-utilities';
 import { handleLoadingEndAtom, handleLoadingStartAtom, usePluginAtoms } from '@repo/jotai';
-import { produce } from 'immer';
-import { atom, SetStateAction } from 'jotai';
+import { atom } from 'jotai';
 import { enqueueSnackbar } from 'notistack';
 import { ChangeEvent, ReactNode } from 'react';
 import invariant from 'tiny-invariant';
@@ -26,23 +25,10 @@ export const {
   getConditionPropertyAtom,
   commonConfigAtom,
   isConditionIdUnselectedAtom,
+  getCommonPropertyAtom,
 } = usePluginAtoms(pluginConfigAtom, {
   enableCommonCondition: true,
 });
-
-export const getCommonPropertyAtom = <T extends keyof PluginCommonConfig>(property: T) =>
-  atom(
-    (get) => {
-      return get(commonConfigAtom)[property];
-    },
-    (_, set, newValue: SetStateAction<PluginCommonConfig[T]>) => {
-      set(commonConfigAtom, (common) =>
-        produce(common, (draft) => {
-          draft[property] = typeof newValue === 'function' ? newValue(draft[property]) : newValue;
-        })
-      );
-    }
-  );
 
 export const handlePluginConditionDeleteAtom = atom(null, (get, set) => {
   const selectedConditionId = get(selectedConditionIdAtom);
