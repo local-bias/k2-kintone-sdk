@@ -1,4 +1,3 @@
-import { getSassPlugin } from './esbuild-sass-plugin.js';
 import { type Options, build } from 'tsup';
 
 /**
@@ -19,7 +18,6 @@ const completeBuildOptions = (params: Options): Options => {
     esbuildOptions(options, context) {
       options.legalComments = 'none';
     },
-    esbuildPlugins: [...(params.esbuildPlugins ?? []), getSassPlugin()],
   };
 };
 
