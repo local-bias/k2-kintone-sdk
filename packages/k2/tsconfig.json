@@ -5,12 +5,18 @@
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+
     "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
     "skipLibCheck": true,
     "outDir": "dist",
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true
   },
   "include": ["src/**/*.ts"],
-  "files": ["types.d.ts"]
+  "files": ["types.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }
