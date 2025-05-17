@@ -60,7 +60,7 @@ export const outputContentsZip = async (manifest: Plugin.Meta.Manifest) => {
 
   archive.pipe(outputZipStream);
   await archive.finalize();
-  await new Promise((resolve) => outputZipStream.on('close', resolve));
+  await new Promise<void>((resolve) => outputZipStream.on('close', resolve));
 };
 
 export const getContentsZipBuffer = async () => {
