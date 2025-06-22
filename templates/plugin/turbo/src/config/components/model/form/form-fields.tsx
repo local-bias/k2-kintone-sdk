@@ -1,4 +1,3 @@
-import { useArray } from '@/config/hooks/use-array';
 import { getConditionPropertyAtom } from '@/config/states/plugin';
 import { JotaiFieldSelect } from '@konomi-app/kintone-utilities-jotai';
 import AddIcon from '@mui/icons-material/Add';
@@ -10,9 +9,13 @@ import { currentAppFieldsAtom } from '../../../states/kintone';
 
 const fieldsAtom = getConditionPropertyAtom('fields');
 
+const { handleItemAddAtom, handleItemDeleteAtom, handleItemUpdateAtom } = useArrayAtom(fieldsAtom);
+
 const Component: FC = () => {
   const fields = useAtomValue(fieldsAtom);
-  const { addItem, deleteItem, updateItem } = useArray(fieldsAtom);
+  const addItem = useSetAtom(handleItemAddAtom);
+  const deleteItem = useSetAtom(handleItemDeleteAtom);
+  const updateItem = useSetAtom(handleItemUpdateAtom);
 
   return (
     <div className='flex flex-col gap-4'>
