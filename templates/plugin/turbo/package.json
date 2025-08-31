@@ -10,7 +10,7 @@
     "build:js": "plugin build",
     "build": "concurrently \"pnpm:build:*\" && plugin zip",
     "standalone": "pnpm run build && plugin zip --env standalone",
-    "dev:js": "plugin dev",
+    "dev:js": "plugin dev --cert-dir C:/workspaces/apps/cert",
     "dev:css-desktop": "pnpm dlx @tailwindcss/cli -i ./src/styles/desktop.css -o ./.plugin/dev/desktop.css --watch",
     "dev:css-config": "pnpm dlx @tailwindcss/cli -i ./src/styles/config.css -o ./.plugin/dev/config.css --watch",
     "dev": "concurrently \"pnpm:dev:*\""
