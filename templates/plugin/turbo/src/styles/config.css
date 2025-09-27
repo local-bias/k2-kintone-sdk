@@ -6,7 +6,7 @@
 
 @import '@repo/tailwindcss/config.css';
 
-@layer plugin {
+@layer base {
   .MuiAutocomplete-popper[role='presentation'] {
     ::-webkit-scrollbar {
       @apply w-1 h-1 md:w-2 md:h-2;
