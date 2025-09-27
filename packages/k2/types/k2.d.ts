@@ -18,6 +18,8 @@ declare namespace K2 {
       config?: string;
       /** CSSファイルのパス */
       css?: string;
+      /** 出力するCSSファイル名 */
+      fileName?: string;
     };
   };
 

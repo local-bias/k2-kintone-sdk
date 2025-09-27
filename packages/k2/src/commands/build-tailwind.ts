@@ -10,11 +10,13 @@ export const buildTailwind = async (config: K2.FullConfig) => {
 
   const inputPath = path.resolve(config.tailwind.css);
 
+  const fileName = config.tailwind.fileName ?? 'tailwind.css';
+
   await outputCss({
     inputPath,
-    outputPath: path.join(config.outDir, 'tailwind.css'),
+    outputPath: path.join(config.outDir, fileName),
     config: tailwindConfig,
     minify: true,
   });
-  console.log('✨ Built tailwind.css');
+  console.log(`✨ Built ${fileName}`);
 };
