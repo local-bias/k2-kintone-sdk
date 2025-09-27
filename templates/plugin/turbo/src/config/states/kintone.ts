@@ -6,8 +6,8 @@ export const currentAppFieldsAtom = atom((get) => {
   const app = get(currentAppIdAtom);
   return get(
     appFormFieldsAtom({
-      appId: app,
-      spaceId: GUEST_SPACE_ID,
+      app,
+      guestSpaceId: GUEST_SPACE_ID,
       preview: true,
     })
   );
