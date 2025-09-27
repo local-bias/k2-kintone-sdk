@@ -21,14 +21,15 @@ export default function command() {
       '.ppk file path',
       path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk')
     )
+    .option('-c, --cert-dir <certDir>', 'Certificate directory', PLUGIN_WORKSPACE_DIRECTORY)
     .description('Start development server.')
     .action(action);
 }
 
-export async function action(options: { ppk: string }) {
+export async function action(options: { ppk: string; certDir: string }) {
   console.group('🍳 Start development server');
   try {
-    const { ppk: ppkPath } = options;
+    const { ppk: ppkPath, certDir } = options;
     const config = await importK2PluginConfig();
 
     if (!fs.existsSync(PLUGIN_DEVELOPMENT_DIRECTORY)) {
@@ -40,7 +41,11 @@ export async function action(options: { ppk: string }) {
     const manifest = await getManifest({ config, port });
     console.log(`📝 manifest.json generated`);
 
-    Promise.all([watchContentsAndUploadZip({ manifest, ppkPath }), watchCss(config), build(port)]);
+    Promise.all([
+      watchContentsAndUploadZip({ manifest, ppkPath }),
+      watchCss(config),
+      build(port, certDir),
+    ]);
   } catch (error) {
     throw error;
   } finally {
@@ -48,16 +53,15 @@ export async function action(options: { ppk: string }) {
   }
 }
 
-async function build(port: number) {
+async function build(
+  port: number,
+  certDir = PLUGIN_WORKSPACE_DIRECTORY,
+  staticDir = PLUGIN_DEVELOPMENT_DIRECTORY
+) {
   const entryPoints: BuildOptions['entryPoints'] = ['desktop', 'config'].map((dir) => ({
     in: path.join('src', dir, 'index.ts'),
     out: dir,
   }));
 
-  base({
-    port,
-    entryPoints,
-    certDir: PLUGIN_WORKSPACE_DIRECTORY,
-    staticDir: PLUGIN_DEVELOPMENT_DIRECTORY,
-  });
+  base({ port, entryPoints, certDir, staticDir });
 }
