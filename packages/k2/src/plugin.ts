@@ -11,7 +11,7 @@ import zip from './commands/plugin-zip.js';
 import lint from './commands/lint.js';
 import tsup from './commands/plugin-tsup.js';
 
-program.name('plugin').version('1.4.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
+program.name('plugin').version('1.12.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
 build();
 esbuild();

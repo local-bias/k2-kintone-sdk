@@ -6,7 +6,7 @@ import genkey from './commands/genkey.js';
 import esbuildBuild from './commands/build-esbuild.js';
 import lint from './commands/lint.js';
 
-program.name('k2').version('1.10.0').description('k2 - 🍳 kintone kitchen 🍳');
+program.name('k2').version('1.12.0').description('k2 - 🍳 kintone kitchen 🍳');
 
 build();
 esbuildBuild();
