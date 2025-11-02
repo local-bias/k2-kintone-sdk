@@ -20,6 +20,7 @@ export const PluginConfigV1Schema = z.object({
 });
 type PluginConfigV1 = z.infer<typeof PluginConfigV1Schema>;
 
+/** 🔌 過去全てのバージョンを含むプラグインの設定情報 */
 export const AnyPluginConfigSchema = z.discriminatedUnion('version', [PluginConfigV1Schema]);
 
 export const LatestPluginConditionSchema = PluginConditionV1Schema;
