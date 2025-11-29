@@ -79,18 +79,3 @@ export const restorePluginConfig = (): PluginConfig => {
   const config = restore<AnyPluginConfig>(PLUGIN_ID, { debug: !isProd }) ?? createConfig();
   return migrateConfig(config);
 };
-
-export const getConditionField = <T extends keyof PluginCondition>(
-  storage: PluginConfig,
-  props: {
-    conditionIndex: number;
-    key: T;
-    defaultValue: NonNullable<PluginCondition[T]>;
-  }
-): NonNullable<PluginCondition[T]> => {
-  const { conditionIndex, key, defaultValue } = props;
-  if (!storage.conditions[conditionIndex]) {
-    return defaultValue;
-  }
-  return storage.conditions[conditionIndex][key] ?? defaultValue;
-};
