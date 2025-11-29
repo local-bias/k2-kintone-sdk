@@ -4,6 +4,7 @@ import { createConfig, migrateConfig, restorePluginConfig } from '@/lib/plugin';
 import { PluginConfig } from '@/schema/plugin-config';
 import { onFileLoad, storePluginConfig } from '@konomi-app/kintone-utilities';
 import { handleLoadingEndAtom, handleLoadingStartAtom, usePluginAtoms } from '@repo/jotai';
+import { saveAsJson } from '@repo/utils';
 import { atom } from 'jotai';
 import { enqueueSnackbar } from 'notistack';
 import { ChangeEvent, ReactNode } from 'react';
@@ -88,16 +89,7 @@ export const exportPluginConfigAtom = atom(null, (get, set) => {
   try {
     set(handleLoadingStartAtom);
     const pluginConfig = get(pluginConfigAtom);
-    const blob = new Blob([JSON.stringify(pluginConfig, null)], {
-      type: 'application/json',
-    });
-    const url = (window.URL || window.webkitURL).createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = `${PLUGIN_NAME}-config.json`;
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    saveAsJson(pluginConfig, `${PLUGIN_NAME}-config.json`);
     enqueueSnackbar(t('common.config.toast.export'), { variant: 'success' });
   } catch (error) {
     enqueueSnackbar(t('common.config.error.export'), { variant: 'error' });
