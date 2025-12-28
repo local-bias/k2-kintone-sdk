@@ -47,6 +47,12 @@ async function action(options: { env: string; ppk: string }): Promise<void> {
 
     await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
     console.log('📦 plugin.zip generated');
+
+    // version ファイルを出力
+    const version = String(manifest.version);
+    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'version'), version);
+    console.log(`📝 version file generated (${version})`);
+
     console.log(`✨ Plugin zip generation completed! zip file path is ./.plugin/${zipFileName}`);
   } catch (error) {
     throw error;
