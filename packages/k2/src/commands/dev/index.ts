@@ -1,21 +1,23 @@
 import { program } from 'commander';
-import { type BuildOptions } from 'esbuild';
+import { createServer } from 'vite';
 import fs from 'fs-extra';
 import path from 'path';
+import chalk from 'chalk';
 import {
   CONFIG_FILE_NAME,
   DEFAULT_PORT,
   DEVELOPMENT_DIRECTORY,
   WORKSPACE_DIRECTORY,
 } from '../../lib/constants.js';
-import base from '../dev-base-esbuild.js';
 import { importK2Config } from '../../lib/import.js';
 import { watchCss } from './tailwind.js';
+import { generateCert, hasCertificates, loadCertificates } from '../../lib/cert.js';
+import { createViteConfig, buildEntriesWithVite, getEntryPointsFromDir } from '../../lib/vite.js';
 
 export default function command() {
   program
     .command('dev')
-    .description('Start development server.')
+    .description('Start development server with Vite.')
     .option('-i, --input <input>', 'Input directory', 'src/apps')
     .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
     .option('-c, --certdir <certdir>', 'Certificate directory', WORKSPACE_DIRECTORY)
@@ -45,35 +47,133 @@ export async function action(options: {
     }
 
     const port = Number(specifiedPort ?? k2Config?.server?.port ?? DEFAULT_PORT);
+    const certDirPath = path.resolve(certdir);
+    const outputDir = path.resolve(outdir);
+    const inputDir = path.resolve(input);
 
-    await Promise.all([
-      build({ certdir, outdir, port, input }),
-      watchCss({ k2Config: k2Config ?? {}, outdir }),
-    ]);
+    // SSL証明書の確認
+    if (!hasCertificates(certDirPath)) {
+      console.log(chalk.yellow('📜 SSL certificates not found. Generating...'));
+      try {
+        await generateCert(certDirPath);
+        console.log(chalk.green('✅ SSL certificates generated successfully'));
+      } catch (error) {
+        console.log(
+          chalk.red('❌ Failed to generate SSL certificates. Make sure mkcert is installed.')
+        );
+        console.log(chalk.gray('   Install mkcert: https://github.com/FiloSottile/mkcert'));
+        throw error;
+      }
+    }
+
+    const entries = getEntryPointsFromDir(inputDir);
+    const entryNames = Object.keys(entries);
+
+    if (entryNames.length === 0) {
+      throw new Error(`No entry points found in ${input}`);
+    }
+
+    console.log(chalk.gray(`  Entry points: ${entryNames.join(', ')}`));
+
+    await fs.emptyDir(outputDir);
+
+    const { key, cert } = loadCertificates(certDirPath);
+
+    // 初回ビルド
+    console.log(chalk.gray('  Building...'));
+    await buildEntriesWithVite({
+      entries,
+      outDir: outputDir,
+      mode: 'development',
+      sourcemap: 'inline',
+      minify: false,
+    });
+
+    // 開発サーバー起動
+    const serverConfig = createViteConfig({
+      root: outputDir,
+      server: {
+        port,
+        https: { key, cert },
+      },
+    });
+
+    const server = await createServer(serverConfig);
+    await server.listen();
+
+    console.log(chalk.green(`\n✨ Development server ready!`));
+    console.log(chalk.cyan(`   Local: https://localhost:${port}`));
+    console.log(chalk.gray(`   Output: ${outputDir}`));
+    console.log(chalk.gray('\n   Watching for changes...\n'));
+
+    // ファイル監視してビルド
+    const chokidar = await import('chokidar');
+    // chokidar v4ではディレクトリを直接監視
+    const watchDirs = [inputDir, path.resolve('src', 'lib')].filter((dir) => fs.existsSync(dir));
+
+    console.log(chalk.gray(`  Watching directories: ${watchDirs.join(', ')}`));
+
+    const watcher = chokidar.watch(watchDirs, {
+      ignored: /node_modules/,
+      persistent: true,
+      ignoreInitial: true,
+    });
+
+    // 監視対象の拡張子
+    const watchExtensions = ['.ts', '.tsx', '.js', '.jsx', '.css', '.scss'];
+    const shouldRebuild = (filePath: string) => {
+      const ext = path.extname(filePath).toLowerCase();
+      return watchExtensions.includes(ext);
+    };
+
+    const rebuild = async () => {
+      console.log(chalk.gray(`  ${new Date().toLocaleTimeString()} Rebuilding...`));
+      await buildEntriesWithVite({
+        entries,
+        outDir: outputDir,
+        mode: 'development',
+        sourcemap: 'inline',
+        minify: false,
+      });
+      console.log(chalk.gray(`  ${new Date().toLocaleTimeString()} Rebuild complete`));
+    };
+
+    watcher.on('ready', () => {
+      console.log(chalk.green('  ✓ File watcher ready'));
+    });
+
+    watcher.on('change', (filePath) => {
+      if (shouldRebuild(filePath)) {
+        console.log(chalk.cyan(`  [change] ${filePath}`));
+        rebuild();
+      }
+    });
+
+    watcher.on('add', (filePath) => {
+      if (shouldRebuild(filePath)) {
+        console.log(chalk.cyan(`  [add] ${filePath}`));
+        rebuild();
+      }
+    });
+
+    watcher.on('unlink', (filePath) => {
+      if (shouldRebuild(filePath)) {
+        console.log(chalk.cyan(`  [unlink] ${filePath}`));
+        rebuild();
+      }
+    });
+
+    watcher.on('error', (error) => {
+      console.error(chalk.red(`  Watcher error: ${error}`));
+    });
+
+    // TailwindCSS監視
+    if (k2Config) {
+      await watchCss({ k2Config, outdir });
+    }
   } catch (error) {
     throw error;
   } finally {
     console.groupEnd();
   }
 }
-
-const build = async (params: { outdir: string; certdir: string; port: number; input: string }) => {
-  const { outdir, certdir, port, input } = params;
-
-  const srcDir = path.resolve(input);
-  const dirs = fs.readdirSync(srcDir);
-
-  const entryPoints: BuildOptions['entryPoints'] = dirs.reduce<{ in: string; out: string }[]>(
-    (acc, dir) => {
-      for (const filename of ['index.ts', 'index.js', 'index.mjs']) {
-        if (fs.existsSync(path.join(srcDir, dir, filename))) {
-          return [...acc, { in: path.join(srcDir, dir, filename), out: dir }];
-        }
-      }
-      return acc;
-    },
-    []
-  );
-
-  return base({ port, entryPoints, certDir: certdir, staticDir: outdir });
-};
