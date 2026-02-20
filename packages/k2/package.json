@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/k2",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "kintone sdk",
   "main": "./dist/index.js",
   "type": "module",
@@ -44,7 +44,7 @@
     "eslint-plugin-promise": "^6.0.0 || ^7.0.0",
     "eslint-plugin-react": "^7.30.0",
     "glob": "^10.0.0 || ^11.0.0",
-    "globals": "^14.0.0 || ^15.0.0 || ^16.0.0",
+    "globals": ">=14.0.0",
     "html-minifier": "^4.0.0",
     "postcss": "^8.0.0",
     "remeda": "^1.0.0 || ^2.0.0",
