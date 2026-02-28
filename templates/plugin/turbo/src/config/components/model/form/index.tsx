@@ -6,12 +6,12 @@ import {
   PluginFormTitle,
 } from '@konomi-app/kintone-utilities-react';
 import { useAtomValue } from 'jotai';
-import { FC } from 'react';
+
 import CommonSettings from './common';
 import DeleteButton from './condition-delete-button';
 import FieldsForm from './form-fields';
 
-const FormContent: FC = () => {
+function FormContent() {
   return (
     <div className='p-4'>
       <PluginFormSection>
@@ -32,11 +32,11 @@ const FormContent: FC = () => {
       <DeleteButton />
     </div>
   );
-};
+}
 
-const FormContainer: FC = () => {
+function PluginForm() {
   const commonSettingsShown = useAtomValue(isConditionIdUnselectedAtom);
   return commonSettingsShown ? <CommonSettings /> : <FormContent />;
-};
+}
 
-export default FormContainer;
+export default PluginForm;

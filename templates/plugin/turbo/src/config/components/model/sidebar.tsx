@@ -5,9 +5,9 @@ import { PluginCondition } from '@/schema/plugin-config';
 import { BundledSidebar } from '@konomi-app/kintone-utilities-react';
 import { useAtom } from 'jotai';
 import { useSnackbar } from 'notistack';
-import { FC, useCallback } from 'react';
+import { useCallback } from 'react';
 
-const Sidebar: FC = () => {
+function Sidebar() {
   const { enqueueSnackbar } = useSnackbar();
   const [conditions, setConditions] = useAtom(pluginConditionsAtom);
   const [selectedConditionId, setSelectedConditionId] = useAtom(selectedConditionIdAtom);
@@ -54,6 +54,6 @@ const Sidebar: FC = () => {
       }}
     />
   );
-};
+}
 
 export default Sidebar;

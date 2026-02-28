@@ -8,7 +8,7 @@ import { Provider, useAtomValue } from 'jotai';
 import { useState, type FC } from 'react';
 import { pluginConfigAtom } from '../public-state';
 
-const Condition: FC<{ condition: PluginCondition }> = ({ condition }) => {
+function Condition({ condition }: { condition: PluginCondition }) {
   return (
     <div>
       <details>
@@ -19,9 +19,9 @@ const Condition: FC<{ condition: PluginCondition }> = ({ condition }) => {
       </details>
     </div>
   );
-};
+}
 
-const DebugContent: FC = () => {
+function DebugContent() {
   const pluginConfig = useAtomValue(pluginConfigAtom);
   return (
     <div>
@@ -30,9 +30,9 @@ const DebugContent: FC = () => {
       ))}
     </div>
   );
-};
+}
 
-const DebugContainer: FC = () => {
+function DebugApp() {
   const [shown, setShown] = useState(false);
 
   const onButtonClick = () => {
@@ -72,6 +72,6 @@ const DebugContainer: FC = () => {
       </div>
     </Provider>
   );
-};
+}
 
-export default DebugContainer;
+export default DebugApp;

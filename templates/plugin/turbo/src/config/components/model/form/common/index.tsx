@@ -5,16 +5,16 @@ import {
   PluginFormSection,
   PluginFormTitle,
 } from '@konomi-app/kintone-utilities-react';
-import { FC } from 'react';
+function CommonSettingsForm() {
+  return (
+    <div className='p-4'>
+      <PluginFormSection>
+        <PluginFormTitle></PluginFormTitle>
+        <PluginFormDescription last></PluginFormDescription>
+        <JotaiText atom={getCommonPropertyAtom('memo')} label={'$'} placeholder={'#'} />
+      </PluginFormSection>
+    </div>
+  );
+}
 
-const Component: FC = () => (
-  <div className='p-4'>
-    <PluginFormSection>
-      <PluginFormTitle></PluginFormTitle>
-      <PluginFormDescription last></PluginFormDescription>
-      <JotaiText atom={getCommonPropertyAtom('memo')} label={'$'} placeholder={'#'} />
-    </PluginFormSection>
-  </div>
-);
-
-export default Component;
+export default CommonSettingsForm;
