@@ -5,7 +5,7 @@ import { store } from '@repo/jotai';
 import { cn } from '@repo/utils';
 import JsonView from '@uiw/react-json-view';
 import { Provider, useAtomValue } from 'jotai';
-import { useState, type FC } from 'react';
+import { useState } from 'react';
 import { pluginConfigAtom } from '../public-state';
 
 function Condition({ condition }: { condition: PluginCondition }) {
