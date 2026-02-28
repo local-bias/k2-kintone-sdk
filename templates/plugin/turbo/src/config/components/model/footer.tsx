@@ -18,9 +18,9 @@ import { loadingAtom } from '@repo/jotai';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useCallback } from 'react';
 
-type Props = {
+interface Props {
   backToPluginList: () => void;
-};
+}
 
 function ConfigResetButton() {
   const reset = useSetAtom(handlePluginConfigResetAtom);
