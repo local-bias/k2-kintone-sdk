@@ -12,7 +12,7 @@ import { URL_BANNER, URL_PROMOTION } from '@repo/constants';
 import { store } from '@repo/jotai';
 import { Provider } from 'jotai';
 import { SnackbarProvider } from 'notistack';
-import config from 'plugin.config.mjs';
+import config from '@/../plugin.config.mjs';
 import { Suspense } from 'react';
 import Footer from './components/model/footer';
 import Form from './components/model/form';
