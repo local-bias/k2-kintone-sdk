@@ -4,7 +4,7 @@ import {
   PluginCondition,
   PluginConfig,
 } from '@/schema/plugin-config';
-import { restorePluginConfig as restore } from '@konomi-app/kintone-utilities';
+import { restorePluginConfig as primitiveRestore } from '@konomi-app/kintone-utilities';
 import { nanoid } from 'nanoid';
 import { isProd, PLUGIN_ID } from './global';
 
@@ -73,9 +73,32 @@ export const migrateConfig = (anyConfig: AnyPluginConfig): PluginConfig => {
 };
 
 /**
- * プラグインの設定情報を復元します
+ * プラグイン設定を復元します
+ * エラーが発生した場合は、エラー情報と共にデフォルト設定を返却します
+ * @returns {config: PluginConfig, error?: Error} プラグイン設定とエラー情報
  */
-export const restorePluginConfig = (): PluginConfig => {
-  const config = restore<AnyPluginConfig>(PLUGIN_ID, { debug: !isProd }) ?? createConfig();
-  return migrateConfig(config);
-};
+export function restorePluginConfig(): { config: PluginConfig; error?: Error } {
+  try {
+    const storedConfig = primitiveRestore<AnyPluginConfig>(PLUGIN_ID);
+
+    if (!storedConfig) {
+      console.warn('⚠️ 保存された設定が見つかりません。デフォルト設定を使用します。');
+      return { config: createConfig() };
+    }
+
+    const migratedConfig = migrateConfig(storedConfig);
+    return { config: migratedConfig };
+  } catch (error) {
+    console.error('❌ プラグイン設定の復元中にエラーが発生しました', error);
+    const configError =
+      error instanceof Error
+        ? error
+        : new Error(`プラグイン設定の復元に失敗しました: ${String(error)}`);
+
+    // エラーが発生してもデフォルト設定を返すことでアプリケーションは起動する
+    return {
+      config: createConfig(),
+      error: configError,
+    };
+  }
+}
