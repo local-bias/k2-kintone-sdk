@@ -48,7 +48,7 @@
     "clsx": "^2.1.1",
     "immer": "^11.1.4",
     "jotai": "^2.18.0",
-    "jotai-derive": "^0.1.3",
+    "jotai-eager": "^0.2.4",
     "jotai-optics": "^0.4.0",
     "lucide-react": "^0.574.0",
     "nanoid": "^5.1.6",
