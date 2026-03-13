@@ -1,11 +1,11 @@
 import { program } from 'commander';
-import fs from 'fs-extra';
 import path from 'path';
+import chalk from 'chalk';
 import { WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import base from './build-base.js';
 import { buildTailwind } from './build-tailwind.js';
 import { importK2Config } from '../lib/import.js';
 import { getDefaultK2Config } from '../lib/k2.js';
+import { buildWithRsbuild, getAppEntryPoints } from '../lib/rsbuild.js';
 
 export default function command() {
   program
@@ -13,7 +13,7 @@ export default function command() {
     .option('-o, --outdir <outdir>', 'Output directory.', path.join(WORKSPACE_DIRECTORY, 'prod'))
     .option('-i, --input <input>', 'Input directory.', path.join('src', 'apps'))
     .option('--config <config>', 'k2 config file path')
-    .description("Build the project for production. (It's a wrapper of webpack build command.)")
+    .description('Build the project for production with rsbuild.')
     .action(action);
 }
 
@@ -24,24 +24,29 @@ export async function action(options: { outdir: string; input: string; config?: 
     const { outdir, input, config } = options;
     const outDir = path.resolve(outdir);
 
-    const allProjects = fs.readdirSync(path.resolve(input));
+    const entries = getAppEntryPoints(path.resolve(input));
+    const entryNames = Object.keys(entries);
 
-    const entries = allProjects.reduce<Record<string, string>>((acc, dir) => {
-      for (const filename of ['index.ts', 'index.js', 'index.mjs']) {
-        if (fs.existsSync(path.join(input, dir, filename))) {
-          return { ...acc, [dir]: path.join(input, dir, filename) };
-        }
-      }
-      return acc;
-    }, {});
+    if (entryNames.length === 0) {
+      throw new Error(`No entry points found in ${input}`);
+    }
+
+    console.log(chalk.gray(`  Entry points: ${entryNames.join(', ')}`));
 
     const k2Config = config ? await importK2Config(config) : getDefaultK2Config();
     const fullConfig: K2.FullConfig = { ...k2Config, outDir };
 
     const results = await Promise.allSettled([
-      base({ entries, outDir }),
+      buildWithRsbuild({
+        entries,
+        outDir,
+        minify: true,
+        sourcemap: false,
+        injectStyles: true,
+      }),
       buildTailwind(fullConfig),
     ]);
+
     for (const result of results) {
       if (result.status === 'rejected') {
         throw result.reason;
