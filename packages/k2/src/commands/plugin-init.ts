@@ -1,10 +1,9 @@
 import { program } from 'commander';
 import fs from 'fs-extra';
 import path from 'path';
-import packer from '@kintone/plugin-packer';
 import { outputManifest } from '../lib/plugin-manifest.js';
 import { PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import { getContentsZipBuffer, outputContentsZip } from '../lib/zip.js';
+import { createContentsZipFromDir, createPluginZip } from '../lib/zip.js';
 import { copyPluginContents } from '../lib/plugin-contents.js';
 
 export default function command() {
@@ -20,24 +19,17 @@ export async function action() {
     await copyPluginContents();
     console.log('📁 contents copied');
 
-    let privateKey: string | undefined;
-    const keyPath = path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk');
-    if (fs.existsSync(keyPath)) {
-      privateKey = await fs.readFile(keyPath, 'utf8');
-    }
+    const ppkPath = path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk');
+    const contentsZip = createContentsZipFromDir(manifest);
+    const { zip, privateKey } = createPluginZip({ ppkPath, contentsZip });
 
-    await outputContentsZip(manifest);
-    const buffer = await getContentsZipBuffer();
-
-    const output = await packer(buffer, privateKey);
-
-    if (!privateKey) {
-      await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk'), output.privateKey);
+    if (!fs.existsSync(ppkPath)) {
       console.log('🔑 private.ppk generated');
     } else {
       console.log('🔑 private.ppk already exists. The existing private.ppk will be used.');
     }
-    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'plugin.zip'), output.plugin);
+
+    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'plugin.zip'), zip);
     console.log('📦 plugin.zip generated');
     console.log('✨ Plugin initialization setup completed! zip file path is ./.plugin/plugin.zip');
   } catch (error) {

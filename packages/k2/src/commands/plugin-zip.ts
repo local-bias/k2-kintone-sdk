@@ -3,8 +3,7 @@ import { outputManifest } from '../lib/plugin-manifest.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import packer from '@kintone/plugin-packer';
-import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '../lib/zip.js';
+import { createContentsZipFromDir, createPluginZip, getZipFileNameSuffix } from '../lib/zip.js';
 import { copyPluginContents } from '../lib/plugin-contents.js';
 import { isEnv } from '../lib/utils.js';
 
@@ -35,17 +34,13 @@ async function action(options: { env: string; ppk: string }): Promise<void> {
     const manifest = await outputManifest(env);
     console.log(`📝 manifest.json generated (${env})`);
 
-    await outputContentsZip(manifest);
+    const contentsZip = createContentsZipFromDir(manifest);
     console.log('📦 contents.zip generated');
 
-    const buffer = await getContentsZipBuffer();
-    const privateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
-
-    const output = await packer(buffer, privateKey);
+    const { zip, id } = createPluginZip({ ppkPath: path.resolve(ppkPath), contentsZip });
 
     const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
-
-    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
+    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), zip);
     console.log('📦 plugin.zip generated');
 
     // version ファイルを出力
@@ -54,6 +49,7 @@ async function action(options: { env: string; ppk: string }): Promise<void> {
     console.log(`📝 version file generated (${version})`);
 
     console.log(`✨ Plugin zip generation completed! zip file path is ./.plugin/${zipFileName}`);
+    console.log(`   Plugin ID: ${id}`);
   } catch (error) {
     throw error;
   } finally {
