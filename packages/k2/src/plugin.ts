@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
 import build from './commands/plugin-build.js';
-import esbuild from './commands/plugin-esbuild.js';
 import dev from './commands/plugin-dev/index.js';
 import genkey from './commands/plugin-genkey.js';
 import init from './commands/plugin-init.js';
@@ -9,12 +8,10 @@ import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
 import zip from './commands/plugin-zip.js';
 import lint from './commands/lint.js';
-import tsup from './commands/plugin-tsup.js';
 
-program.name('plugin').version('1.12.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
+program.name('plugin').version('4.0.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
 build();
-esbuild();
 dev();
 genkey();
 init();
@@ -22,6 +19,5 @@ manifest();
 test();
 zip();
 lint();
-tsup();
 
 program.parse(process.argv);
