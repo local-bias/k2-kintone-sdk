@@ -1,5 +1,4 @@
 import { program } from 'commander';
-import { createServer } from 'vite';
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
@@ -11,13 +10,13 @@ import {
 } from '../../lib/constants.js';
 import { importK2Config } from '../../lib/import.js';
 import { watchCss } from './tailwind.js';
-import { generateCert, hasCertificates, loadCertificates } from '../../lib/cert.js';
-import { createViteConfig, buildEntriesWithVite, getEntryPointsFromDir } from '../../lib/vite.js';
+import { generateCert, hasCertificates, loadCertificates } from '../../lib/cert/index.js';
+import { startRsbuildDevServer, getAppEntryPoints } from '../../lib/rsbuild.js';
 
 export default function command() {
   program
     .command('dev')
-    .description('Start development server with Vite.')
+    .description('Start development server with rsbuild.')
     .option('-i, --input <input>', 'Input directory', 'src/apps')
     .option('-o, --outdir <outdir>', 'Output directory.', DEVELOPMENT_DIRECTORY)
     .option('-c, --certdir <certdir>', 'Certificate directory', WORKSPACE_DIRECTORY)
@@ -51,22 +50,19 @@ export async function action(options: {
     const outputDir = path.resolve(outdir);
     const inputDir = path.resolve(input);
 
-    // SSL証明書の確認
+    // SSL証明書の確認・生成 (node-forge使用、mkcert不要)
     if (!hasCertificates(certDirPath)) {
-      console.log(chalk.yellow('📜 SSL certificates not found. Generating...'));
+      console.log(chalk.yellow('📜 SSL certificates not found. Generating with node-forge...'));
       try {
-        await generateCert(certDirPath);
+        generateCert(certDirPath);
         console.log(chalk.green('✅ SSL certificates generated successfully'));
       } catch (error) {
-        console.log(
-          chalk.red('❌ Failed to generate SSL certificates. Make sure mkcert is installed.')
-        );
-        console.log(chalk.gray('   Install mkcert: https://github.com/FiloSottile/mkcert'));
+        console.log(chalk.red('❌ Failed to generate SSL certificates.'));
         throw error;
       }
     }
 
-    const entries = getEntryPointsFromDir(inputDir);
+    const entries = getAppEntryPoints(inputDir);
     const entryNames = Object.keys(entries);
 
     if (entryNames.length === 0) {
@@ -75,96 +71,28 @@ export async function action(options: {
 
     console.log(chalk.gray(`  Entry points: ${entryNames.join(', ')}`));
 
-    await fs.emptyDir(outputDir);
-
     const { key, cert } = loadCertificates(certDirPath);
 
-    // 初回ビルド
-    console.log(chalk.gray('  Building...'));
-    await buildEntriesWithVite({
+    // rsbuild 開発サーバー起動 (ビルド + ファイル監視 + 配信を自動で行う)
+    const { port: actualPort } = await startRsbuildDevServer({
       entries,
       outDir: outputDir,
-      mode: 'development',
-      sourcemap: 'inline',
-      minify: false,
-    });
-
-    // 開発サーバー起動
-    const serverConfig = createViteConfig({
-      root: outputDir,
-      server: {
-        port,
-        https: { key, cert },
+      port,
+      https: { key, cert },
+      publicDir: outputDir,
+      onFirstCompile: () => {
+        console.log(chalk.green(`\n✨ Development server ready!`));
+        console.log(chalk.cyan(`   Local: https://localhost:${actualPort}`));
+        console.log(chalk.gray(`   Output: ${outputDir}`));
+        console.log(chalk.gray('\n   Watching for changes...\n'));
       },
-    });
-
-    const server = await createServer(serverConfig);
-    await server.listen();
-
-    console.log(chalk.green(`\n✨ Development server ready!`));
-    console.log(chalk.cyan(`   Local: https://localhost:${port}`));
-    console.log(chalk.gray(`   Output: ${outputDir}`));
-    console.log(chalk.gray('\n   Watching for changes...\n'));
-
-    // ファイル監視してビルド
-    const chokidar = await import('chokidar');
-    // chokidar v4ではディレクトリを直接監視
-    const watchDirs = [inputDir, path.resolve('src', 'lib')].filter((dir) => fs.existsSync(dir));
-
-    console.log(chalk.gray(`  Watching directories: ${watchDirs.join(', ')}`));
-
-    const watcher = chokidar.watch(watchDirs, {
-      ignored: /node_modules/,
-      persistent: true,
-      ignoreInitial: true,
-    });
-
-    // 監視対象の拡張子
-    const watchExtensions = ['.ts', '.tsx', '.js', '.jsx', '.css', '.scss'];
-    const shouldRebuild = (filePath: string) => {
-      const ext = path.extname(filePath).toLowerCase();
-      return watchExtensions.includes(ext);
-    };
-
-    const rebuild = async () => {
-      console.log(chalk.gray(`  ${new Date().toLocaleTimeString()} Rebuilding...`));
-      await buildEntriesWithVite({
-        entries,
-        outDir: outputDir,
-        mode: 'development',
-        sourcemap: 'inline',
-        minify: false,
-      });
-      console.log(chalk.gray(`  ${new Date().toLocaleTimeString()} Rebuild complete`));
-    };
-
-    watcher.on('ready', () => {
-      console.log(chalk.green('  ✓ File watcher ready'));
-    });
-
-    watcher.on('change', (filePath) => {
-      if (shouldRebuild(filePath)) {
-        console.log(chalk.cyan(`  [change] ${filePath}`));
-        rebuild();
-      }
-    });
-
-    watcher.on('add', (filePath) => {
-      if (shouldRebuild(filePath)) {
-        console.log(chalk.cyan(`  [add] ${filePath}`));
-        rebuild();
-      }
-    });
-
-    watcher.on('unlink', (filePath) => {
-      if (shouldRebuild(filePath)) {
-        console.log(chalk.cyan(`  [unlink] ${filePath}`));
-        rebuild();
-      }
-    });
-
-    watcher.on('error', (error) => {
-      console.error(chalk.red(`  Watcher error: ${error}`));
+      onRecompile: () => {
+        console.log(
+          chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
+            chalk.cyan(`[rsbuild] `) +
+            `rebuild complete`
+        );
+      },
     });
 
     // TailwindCSS監視

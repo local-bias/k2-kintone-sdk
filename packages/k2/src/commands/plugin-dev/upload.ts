@@ -1,11 +1,10 @@
-import packer from '@kintone/plugin-packer';
 import { copyPluginContents } from '../../lib/plugin-contents.js';
-import { getContentsZipBuffer, getZipFileNameSuffix, outputContentsZip } from '../../lib/zip.js';
+import { createContentsZipFromDir, createPluginZip, getZipFileNameSuffix } from '../../lib/zip.js';
+import { uploadPlugin } from '../../lib/kintone-api-client.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { PLUGIN_WORKSPACE_DIRECTORY } from '../../lib/constants.js';
-import { apiUploadZip } from '../../lib/utils.js';
-import chokider from 'chokidar';
+import chokidar from 'chokidar';
 import chalk from 'chalk';
 
 export const watchContentsAndUploadZip = async (params: {
@@ -33,17 +32,20 @@ export const watchContentsAndUploadZip = async (params: {
     }
 
     try {
-      await outputContentsZip(manifest);
-      const buffer = await getContentsZipBuffer();
-      const pluginPrivateKey = await fs.readFile(path.resolve(ppkPath), 'utf8');
-
-      const output = await packer(buffer, pluginPrivateKey);
+      const contentsZip = createContentsZipFromDir(manifest);
+      const { zip, id: pluginId } = createPluginZip({
+        ppkPath: path.resolve(ppkPath),
+        contentsZip,
+      });
 
       const zipFileName = `plugin${getZipFileNameSuffix('dev')}.zip`;
+      await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), zip);
 
-      await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), output.plugin);
+      const { method } = await uploadPlugin({
+        pluginId,
+        file: { name: zipFileName, data: zip },
+      });
 
-      const { method } = await apiUploadZip({ env: 'dev', pluginId: output.id });
       console.log(
         chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
           chalk.cyan(`[upload] `) +
@@ -59,7 +61,7 @@ export const watchContentsAndUploadZip = async (params: {
     }
   };
 
-  const contentsWatcher = chokider.watch(['src/contents/**/*'], {
+  const contentsWatcher = chokidar.watch(['src/contents/**/*'], {
     ignored: /node_modules/,
     persistent: true,
   });
