@@ -3,10 +3,10 @@ import { t } from '@/lib/i18n';
 import { createConfig, migrateConfig, restorePluginConfig } from '@/lib/plugin';
 import { PluginConfig } from '@/schema/plugin-config';
 import { onFileLoad, storePluginConfig } from '@konomi-app/kintone-utilities';
+import { toast } from '@konomi-app/ui';
 import { handleLoadingEndAtom, handleLoadingStartAtom, usePluginAtoms } from '@repo/jotai';
 import { saveAsJson } from '@repo/utils';
 import { atom } from 'jotai';
-import { enqueueSnackbar } from 'notistack';
 import { ChangeEvent, ReactNode } from 'react';
 import invariant from 'tiny-invariant';
 
@@ -14,7 +14,7 @@ export const pluginConfigAtom = atom<PluginConfig>(restorePluginConfig());
 
 export const handlePluginConfigResetAtom = atom(null, (_, set) => {
   set(pluginConfigAtom, createConfig());
-  enqueueSnackbar(t('common.config.toast.reset'), { variant: 'success' });
+  toast.success(t('common.config.toast.reset'));
 });
 
 export const {
@@ -37,7 +37,7 @@ export const handlePluginConditionDeleteAtom = atom(null, (get, set) => {
     prev.filter((condition) => condition.id !== selectedConditionId)
   );
   set(selectedConditionIdAtom, null);
-  enqueueSnackbar(t('common.config.toast.onConditionDelete'), { variant: 'success' });
+  toast.success(t('common.config.toast.onConditionDelete'));
 });
 
 export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNode) => {
@@ -49,10 +49,7 @@ export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNo
       flatProperties: ['conditions'],
       debug: true,
     });
-    enqueueSnackbar(t('common.config.toast.save'), {
-      variant: 'success',
-      action: actionComponent,
-    });
+    toast.success(t('common.config.toast.save'));
   } finally {
     set(handleLoadingEndAtom);
   }
@@ -72,9 +69,9 @@ export const importPluginConfigAtom = atom(
       const fileEvent = await onFileLoad(file!);
       const text = (fileEvent.target?.result ?? '') as string;
       set(pluginConfigAtom, migrateConfig(JSON.parse(text)));
-      enqueueSnackbar(t('common.config.toast.import'), { variant: 'success' });
+      toast.success(t('common.config.toast.import'));
     } catch (error) {
-      enqueueSnackbar(t('common.config.error.import'), { variant: 'error' });
+      toast.error(t('common.config.error.import'));
       throw error;
     } finally {
       set(handleLoadingEndAtom);
@@ -90,9 +87,9 @@ export const exportPluginConfigAtom = atom(null, (get, set) => {
     set(handleLoadingStartAtom);
     const pluginConfig = get(pluginConfigAtom);
     saveAsJson(pluginConfig, `${PLUGIN_NAME}-config.json`);
-    enqueueSnackbar(t('common.config.toast.export'), { variant: 'success' });
+    toast.success(t('common.config.toast.export'));
   } catch (error) {
-    enqueueSnackbar(t('common.config.error.export'), { variant: 'error' });
+    toast.error(t('common.config.error.export'));
     throw error;
   } finally {
     set(handleLoadingEndAtom);
