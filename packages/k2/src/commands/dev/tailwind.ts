@@ -1,16 +1,14 @@
 import path from 'path';
 import chalk from 'chalk';
-import { getTailwindConfigFromK2Config, watchTailwindCSS } from '../../lib/tailwind.js';
+import { watchTailwindCSS } from '../../lib/tailwind.js';
 import fs from 'fs-extra';
 
 export const watchCss = async (params: { k2Config: K2.Config; outdir: string }) => {
   const { k2Config, outdir } = params;
-  if (!k2Config.tailwind?.css || !k2Config.tailwind?.config) {
-    console.log('🚫 missing tailwind config. Skip watching css.');
+  if (!k2Config.tailwind?.css) {
+    console.log('🚫 missing tailwind css config. Skip watching css.');
     return;
   }
-
-  const tailwindConfig = await getTailwindConfigFromK2Config(k2Config.tailwind);
 
   const input = path.resolve(k2Config.tailwind.css);
   const output = path.join(outdir, 'tailwind.css');
@@ -22,7 +20,6 @@ export const watchCss = async (params: { k2Config: K2.Config; outdir: string }) 
   return watchTailwindCSS({
     input,
     output: path.join(outdir, 'tailwind.css'),
-    config: tailwindConfig,
     onChanges: ({ output, type }) => {
       const outputFileName = path.basename(output);
       console.log(

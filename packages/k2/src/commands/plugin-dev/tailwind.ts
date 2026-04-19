@@ -1,22 +1,16 @@
 import path from 'path';
-import { type Config as TailwindConfig } from 'tailwindcss';
 import { PLUGIN_DEVELOPMENT_DIRECTORY } from '../../lib/constants.js';
 import chalk from 'chalk';
-import { getTailwindConfig, getTailwindInputCss, watchTailwindCSS } from '../../lib/tailwind.js';
+import { getTailwindInputCss, watchTailwindCSS } from '../../lib/tailwind.js';
 
-async function buildTailwindCSS(params: {
-  inputFile: string;
-  outputFileName: string;
-  config: TailwindConfig;
-}) {
-  const { inputFile, outputFileName, config } = params;
+async function buildTailwindCSS(params: { inputFile: string; outputFileName: string }) {
+  const { inputFile, outputFileName } = params;
   const inputPath = path.resolve(inputFile);
   const outputPath = path.join(PLUGIN_DEVELOPMENT_DIRECTORY, outputFileName);
 
   return watchTailwindCSS({
     input: inputPath,
     output: outputPath,
-    config,
     onChanges: ({ output, type }) => {
       const outputFileName = path.basename(output);
       console.log(
@@ -30,11 +24,9 @@ async function buildTailwindCSS(params: {
 }
 
 export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
-  if (!pluginConfig.tailwind?.css || !pluginConfig.tailwind?.config) {
+  if (!pluginConfig.tailwind?.css) {
     return;
   }
-
-  const tailwindConfig = await getTailwindConfig(pluginConfig.tailwind);
 
   const inputFile = getTailwindInputCss(pluginConfig.tailwind);
 
@@ -42,12 +34,10 @@ export const watchCss = async (pluginConfig: Plugin.Meta.Config) => {
     buildTailwindCSS({
       inputFile: inputFile.desktop,
       outputFileName: 'desktop.css',
-      config: tailwindConfig.desktop,
     }),
     buildTailwindCSS({
       inputFile: inputFile.config,
       outputFileName: 'config.css',
-      config: tailwindConfig.config,
     }),
   ]);
 };

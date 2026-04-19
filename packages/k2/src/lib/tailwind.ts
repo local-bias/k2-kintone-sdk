@@ -5,17 +5,8 @@ import { glob } from 'glob';
 import path from 'path';
 import postcss from 'postcss';
 import { debounce } from 'remeda';
-import tailwindcss, { type Config as TailwindConfig } from 'tailwindcss';
+import tailwindcss from '@tailwindcss/postcss';
 import invariant from 'tiny-invariant';
-import { esmImport } from './import.js';
-
-export const getTailwindConfigFromK2Config = async (
-  k2Config: K2.Config['tailwind']
-): Promise<TailwindConfig> => {
-  invariant(k2Config?.config, 'tailwind.config is required');
-  const config = (await esmImport(path.resolve(k2Config?.config))).default;
-  return config;
-};
 
 export const getTailwindInputCss = (
   config: Plugin.Meta.Config['tailwind']
@@ -32,42 +23,22 @@ export const getTailwindInputCss = (
   };
 };
 
-export const getTailwindConfig = async (
-  config: Plugin.Meta.Config['tailwind']
-): Promise<{
-  desktop: TailwindConfig;
-  config: TailwindConfig;
-}> => {
-  invariant(config?.config, 'tailwind.config is required');
-
-  const { config: configPath } = config;
-
-  const configPathForDesktop = typeof configPath === 'string' ? configPath : configPath.desktop;
-  const configPathForConfig = typeof configPath === 'string' ? configPath : configPath.config;
-
-  const desktopConfig = (await esmImport(path.resolve(configPathForDesktop))).default;
-  const configConfig = (await esmImport(path.resolve(configPathForConfig))).default;
-
-  return { desktop: desktopConfig, config: configConfig };
-};
-
 export const outputCss = async (params: {
   inputPath: string;
   outputPath: string;
-  config: TailwindConfig;
   minify?: boolean;
 }) => {
-  const { inputPath, outputPath, config, minify = false } = params;
+  const { inputPath, outputPath, minify = false } = params;
 
   const css = await fs.readFile(inputPath, 'utf8');
 
-  const result = await postcss([tailwindcss(config), ...(minify ? [cssnanoPlugin()] : [])]).process(
-    css,
-    {
-      from: inputPath,
-      to: outputPath,
-    }
-  );
+  const result = await postcss([
+    tailwindcss({ base: path.dirname(inputPath), optimize: minify }),
+    ...(minify ? [cssnanoPlugin()] : []),
+  ]).process(css, {
+    from: inputPath,
+    to: outputPath,
+  });
 
   await fs.writeFile(outputPath, result.css);
 
@@ -83,16 +54,16 @@ export const watchTailwindCSS = async (params: {
   input: string;
   /** output path */
   output: string;
-  /** tailwindcss config file */
-  config: TailwindConfig;
+  /** content glob patterns for file watching */
+  contentPatterns?: string[];
   /** callback function */
   onChanges?: (params: { input: string; output: string; type: WatchType }) => void;
 }) => {
-  const { input, output, config } = params;
+  const { input, output, contentPatterns } = params;
 
-  const content = (config.content as string[] | undefined) ?? ['./src/**/*.{ts,tsx}'];
+  const patterns = contentPatterns ?? ['./src/**/*.{ts,tsx}'];
 
-  const files = await glob([...content, input], { ignore: ['**/node_modules/**'] });
+  const files = await glob([...patterns, input], { ignore: ['**/node_modules/**'] });
 
   const watcher = chokidar.watch(files, {
     persistent: true,
@@ -103,7 +74,7 @@ export const watchTailwindCSS = async (params: {
 
   const processChanges = async (type: WatchType) => {
     try {
-      await outputCss({ inputPath: input, outputPath: output, config });
+      await outputCss({ inputPath: input, outputPath: output });
       params.onChanges?.({ input, output, type });
     } catch (error) {
       console.error('Error building Tailwind CSS:', error);
