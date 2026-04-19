@@ -90,31 +90,38 @@ declare namespace Plugin {
       };
 
       /**
-       * tailwindcssを使用している場合、設定ファイルのパスとCSSファイルのパスを指定することで、JavaScriptファイルのビルド時にCSSファイルを生成します
+       * tailwindcssを使用している場合、CSSファイルのパスを指定することで、JavaScriptファイルのビルド時にCSSファイルを生成します
+       *
+       * Tailwind CSS v4では、設定はCSSファイル内で`@config`ディレクティブや`@theme`ブロックを使用して行います
        *
        * @see {@link https://tailwindcss.com/docs/installation | Tailwind CSS}
        * @example
-       * ```json
-       * // 共通の設定ファイルを使用する場合
+       * ```js
+       * // 共通のCSSファイルを使用する場合
        * {
-       *  "tailwind": {
-       *   "config": "tailwind.config.js",
-       *  "css": "src/styles/tailwind.css"
+       *   "tailwind": {
+       *     "css": "src/styles/tailwind.css"
+       *   }
        * }
        *
-       * // 設定ファイルをプラグイン設定画面、アプリで分ける場合
+       * // プラグイン設定画面とデスクトップでCSSファイルを分ける場合
        * {
-       * "tailwind": {
-       *   "config": {
-       *     "config": "tailwind.config.js",
-       *     "desktop": "src/styles/tailwind-desktop.css"
-       *   },
-       *   "css": "src/styles/tailwind-mobile.css"
+       *   "tailwind": {
+       *     "css": {
+       *       "config": "src/styles/tailwind-config.css",
+       *       "desktop": "src/styles/tailwind-desktop.css"
+       *     }
+       *   }
        * }
+       * ```
+       *
+       * ```css
+       * // src/styles/tailwind.css
+       * @import "tailwindcss";
+       * @config "../../tailwind.config.js"; // オプション: レガシーJS設定ファイルを使用する場合
        * ```
        */
       tailwind?: {
-        config?: string | { config: string; desktop: string };
         /** CSSファイルのパス */
         css?: string | { config: string; desktop: string };
       };
@@ -136,6 +143,8 @@ declare namespace Plugin {
     'pt-BR': string;
     /** タイ語 */
     th: string;
+    /** マレー語 */
+    ms: string;
   };
 
   type Resources = {
