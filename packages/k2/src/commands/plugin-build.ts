@@ -4,7 +4,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importK2PluginConfig } from '../lib/import.js';
-import { getTailwindConfig, getTailwindInputCss, outputCss } from '../lib/tailwind.js';
+import { getTailwindInputCss, outputCss } from '../lib/tailwind.js';
 import { lint } from '../lib/lint.js';
 import { buildWithRsbuild, getPluginEntryPoints } from '../lib/rsbuild.js';
 
@@ -31,14 +31,12 @@ export async function action() {
     }
 
     // Tailwind CSS ビルド
-    if (config.tailwind?.css && config.tailwind?.config) {
-      const tailwindConfig = await getTailwindConfig(config.tailwind);
+    if (config.tailwind?.css) {
       const inputFile = getTailwindInputCss(config.tailwind);
 
       await outputCss({
         inputPath: inputFile.config,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.css'),
-        config: tailwindConfig.config,
         minify: true,
       });
       console.log('✨ Built config.css');
@@ -46,7 +44,6 @@ export async function action() {
       await outputCss({
         inputPath: inputFile.desktop,
         outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'desktop.css'),
-        config: tailwindConfig.desktop,
         minify: true,
       });
       console.log('✨ Built desktop.css');
