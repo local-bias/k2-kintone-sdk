@@ -7,7 +7,6 @@ import init from './commands/plugin-init.js';
 import manifest from './commands/manifest/index.js';
 import test from './commands/test/index.js';
 import zip from './commands/plugin-zip.js';
-import lint from './commands/lint.js';
 
 program.name('plugin').version('4.0.0').description('🍳 kintone kitchen 🍳 for kintone plugin');
 
@@ -18,6 +17,5 @@ init();
 manifest();
 test();
 zip();
-lint();
 
 program.parse(process.argv);

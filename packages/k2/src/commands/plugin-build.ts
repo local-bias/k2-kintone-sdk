@@ -5,7 +5,6 @@ import chalk from 'chalk';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importK2PluginConfig } from '../lib/import.js';
 import { getTailwindInputCss, outputCss } from '../lib/tailwind.js';
-import { lint } from '../lib/lint.js';
 import { buildWithRsbuild, getPluginEntryPoints } from '../lib/rsbuild.js';
 
 export default function command() {
@@ -20,11 +19,6 @@ export async function action() {
 
   try {
     const config = await importK2PluginConfig();
-
-    if (config?.lint?.build) {
-      await lint();
-      console.log('✨ Lint success.');
-    }
 
     if (!fs.existsSync(PLUGIN_CONTENTS_DIRECTORY)) {
       await fs.mkdir(PLUGIN_CONTENTS_DIRECTORY, { recursive: true });

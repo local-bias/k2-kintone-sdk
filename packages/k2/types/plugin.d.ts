@@ -84,11 +84,6 @@ declare namespace Plugin {
         port?: number;
       };
 
-      lint?: {
-        build?: boolean;
-        dev?: boolean;
-      };
-
       /**
        * tailwindcssを使用している場合、CSSファイルのパスを指定することで、JavaScriptファイルのビルド時にCSSファイルを生成します
        *
