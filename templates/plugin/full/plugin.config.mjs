@@ -10,9 +10,6 @@ export default /** @type { const } */ ({
   server: {
     port: 65535,
   },
-  lint: {
-    build: true,
-  },
   tailwind: {
     css: 'src/styles/global.css',
     config: {
