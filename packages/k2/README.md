@@ -51,7 +51,7 @@ npx k2 build
 
 ### Configuration
 
-プロジェクトルートの `k2.config.mjs` で設定します。
+プロジェクトルートの `k2.config.mjs` で設定します。`k2 dev` / `k2 build` はこのファイルを自動で読み込みます (`--config` で別のパスを指定することもできます)。
 
 ```js
 // k2.config.mjs

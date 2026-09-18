@@ -53,7 +53,8 @@ export const outputCss = async (params: {
   const css = await fs.readFile(inputPath, 'utf8');
 
   const result = await postcss([
-    tailwindcss({ base: path.dirname(inputPath), optimize: minify }),
+    // `base` を省略し、Tailwind CSS 標準どおりカレントディレクトリ (プロジェクトルート) からクラスを検出します
+    tailwindcss({ optimize: minify }),
     ...(minify ? [cssnanoPlugin()] : []),
   ]).process(css, {
     from: inputPath,

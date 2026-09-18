@@ -2,23 +2,33 @@ declare namespace Plugin {
   namespace Meta {
     type Env = 'dev' | 'prod' | 'standalone';
 
+    /**
+     * 言語ごとのテキスト
+     *
+     * kintone のマニフェストの仕様上、英語 (`en`) のみ必須で、その他の言語は任意です
+     *
+     * @see {@link https://github.com/kintone/js-sdk/tree/main/packages/plugin-manifest-validator | @kintone/plugin-manifest-validator}
+     */
+    type LocalizedText = Pick<Locales, 'en'> & Partial<Locales>;
+
     type Manifest = {
       type: 'APP';
       manifest_version: 1;
       version: number | string;
       /**
-       * プラグインの名前
+       * プラグインの名前 (各言語1文字以上64文字以下)
        *
        * インストール時、プラグイン一覧画面で表示されます
        */
-      name: Locales;
+      name: LocalizedText;
       /**
-       * プラグインの説明
+       * プラグインの説明 (各言語1文字以上200文字以下)
        *
        * インストール時、プラグイン一覧画面で表示されます
        */
-      description?: Locales;
+      description?: LocalizedText;
       icon: string;
+      /** プラグインのWebサイトのURL (`name` に存在する言語のみ指定できます) */
       homepage_url?: Partial<Locales>;
       desktop?: Partial<Resources>;
       mobile?: Partial<Resources>;

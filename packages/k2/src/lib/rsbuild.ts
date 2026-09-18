@@ -5,7 +5,8 @@ import path from 'node:path';
 import { ENTRY_POINT_FILE_NAMES } from './constants.js';
 
 type SourceMapConfig = NonNullable<NonNullable<RsbuildConfig['output']>['sourceMap']>;
-type JsSourceMap = NonNullable<SourceMapConfig>['js'];
+/** `output.sourceMap` は `boolean | { js, css }` のため、オブジェクト形式から `js` の型を取り出します */
+type JsSourceMap = Exclude<SourceMapConfig, boolean>['js'];
 
 /** HMR用の中間ファイルの識別子 */
 const HOT_UPDATE_MARKER = '.hot-update.';
