@@ -4,8 +4,8 @@
   "rsc": false,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.common.config.mjs",
-    "css": "src/styles/global.css",
+    "config": "",
+    "css": "src/styles/common.css",
     "baseColor": "gray",
     "cssVariables": true,
     "prefix": ""

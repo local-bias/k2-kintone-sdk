@@ -12,7 +12,7 @@ import {
 import { LoaderWithLabel } from '@konomi-app/ui-react';
 import { Provider } from 'jotai';
 import { SnackbarProvider } from 'notistack';
-import config from 'plugin.config.mjs';
+import config from '@/../plugin.config.mjs';
 import { FC, Suspense } from 'react';
 import Debug from './components/model/debug';
 import Footer from './components/model/footer';

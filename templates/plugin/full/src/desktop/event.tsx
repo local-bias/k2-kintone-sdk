@@ -10,7 +10,7 @@ import { ComponentManager } from '@konomi-app/kintone-utilities-react';
 import { Alert, AlertTitle, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { Provider } from 'jotai';
 import { Rocket } from 'lucide-react';
-import config from 'plugin.config.mjs';
+import config from '@/../plugin.config.mjs';
 import { FC, useState } from 'react';
 
 const ROOT_ID = `🐸${config.id}-root`;

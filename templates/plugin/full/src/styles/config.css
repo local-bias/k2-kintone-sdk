@@ -1,0 +1,11 @@
+/* プラグイン設定画面用のスタイル (plugin.config.mjs の tailwind.css.config) */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import 'tw-animate-css';
+@import './common.css';
+
+@source '../components';
+@source '../config';
+@source '../lib';

@@ -120,7 +120,6 @@ export const updatePluginConfig = atom(null, (get, set, actionComponent: ReactNo
     set(loadingStartAtom);
     const pluginConfig = get(pluginConfigAtom);
     storePluginConfig(pluginConfig, {
-      callback: () => true,
       flatProperties: ['conditions'],
       debug: true,
     });

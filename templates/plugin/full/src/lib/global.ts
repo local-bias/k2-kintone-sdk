@@ -1,6 +1,7 @@
 import { detectGuestSpaceId } from '@konomi-app/kintone-utilities';
 
-export const ENV = (process?.env?.NODE_ENV ?? 'production') as 'production' | 'development';
+// ビルド時に文字列へ置換されるため、オプショナルチェイニングを使用しないでください
+export const ENV = process.env.NODE_ENV;
 export const isProd = ENV === 'production';
 export const isDev = ENV === 'development';
 

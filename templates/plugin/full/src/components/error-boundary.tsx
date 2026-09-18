@@ -4,7 +4,7 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { URL_INQUIRY } from '@/lib/constants';
 import { LoaderWithLabel } from '@konomi-app/ui-react';
 import styled from '@emotion/styled';
-import config from 'plugin.config.mjs';
+import config from '@/../plugin.config.mjs';
 
 const ErrorFallbackComponent: FC<FallbackProps & { className?: string }> = ({
   className,
@@ -12,6 +12,8 @@ const ErrorFallbackComponent: FC<FallbackProps & { className?: string }> = ({
   resetErrorBoundary,
 }) => {
   const [loading, setLoading] = useState(false);
+  // react-error-boundary v6 では Error 以外の値も throw されうるため `unknown` で渡されます
+  const normalizedError = error instanceof Error ? error : new Error(String(error));
 
   const onRetry = () => {
     setLoading(true);
@@ -28,7 +30,7 @@ const ErrorFallbackComponent: FC<FallbackProps & { className?: string }> = ({
   return (
     <div className={className}>
       <Alert severity='error'>
-        <AlertTitle title={error.message}>エラーが発生しました</AlertTitle>
+        <AlertTitle title={normalizedError.message}>エラーが発生しました</AlertTitle>
         <h2>解決方法</h2>
         <ol>
           <li>
@@ -75,8 +77,8 @@ const ErrorFallbackComponent: FC<FallbackProps & { className?: string }> = ({
                     プラグインID: config.id,
                     プラグイン名: config.manifest.base.name.ja,
                     バージョン: config.manifest.base.version,
-                    エラーメッセージ: error?.message ?? '不明なエラー ',
-                    エラースタック: error?.stack,
+                    エラーメッセージ: normalizedError.message || '不明なエラー',
+                    エラースタック: normalizedError.stack,
                     エラー詳細: error,
                   },
                   null,

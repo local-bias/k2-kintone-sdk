@@ -11,10 +11,9 @@ export default /** @type { const } */ ({
     port: 65535,
   },
   tailwind: {
-    css: 'src/styles/global.css',
-    config: {
-      desktop: 'tailwind.config.desktop.mjs',
-      config: 'tailwind.config.config.mjs',
+    css: {
+      config: 'src/styles/config.css',
+      desktop: 'src/styles/desktop.css',
     },
   },
   manifest: {
@@ -26,11 +25,21 @@ export default /** @type { const } */ ({
         en: 'kintone-plugin-template',
         ja: 'プラグインテンプレート',
         zh: '插件模板',
+        'zh-TW': '外掛程式範本',
+        es: 'Plantilla de complemento',
+        'pt-BR': 'Modelo de plugin',
+        th: 'แม่แบบปลั๊กอิน',
+        ms: 'Templat pemalam',
       },
       description: {
         en: 'kintone-plugin-template',
         ja: 'プラグインの説明をここに記載します',
         zh: '插件模板',
+        'zh-TW': '外掛程式範本',
+        es: 'Plantilla de complemento',
+        'pt-BR': 'Modelo de plugin',
+        th: 'แม่แบบปลั๊กอิน',
+        ms: 'Templat pemalam',
       },
       icon: 'icon.png',
       homepage_url: { ja: hp, en: hp },

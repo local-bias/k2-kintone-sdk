@@ -1,27 +1,23 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "sourceMap": true,
-    "target": "ESNext",
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "lib": ["esnext", "dom"],
-    "outDir": "dist",
-    "allowJs": true,
-    "noUncheckedIndexedAccess": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "strict": true,
-    "typeRoots": ["src/types", "node_modules/@types"],
+    "noUncheckedIndexedAccess": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
     "paths": { "@/*": ["./src/*"] }
   },
   "files": [
     "./node_modules/@kintone/dts-gen/kintone.d.ts",
-    "./node_modules/@konomi-app/k2/types.d.ts",
-    "./node_modules/@konomi-app/kintone-utilities/cybozu.d.ts"
+    "./node_modules/@konomi-app/k2/types.d.ts"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"]
 }

@@ -1,0 +1,15 @@
+/*
+  レコード一覧・詳細画面などのデスクトップ画面用のスタイル (plugin.config.mjs の tailwind.css.desktop)
+
+  - kintone 本体の表示を崩さないよう preflight は読み込みません
+  - kintone 本体のスタイル (レイヤー外) より優先されるよう、ユーティリティに !important を付与します
+*/
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) important source(none);
+@import 'tw-animate-css';
+@import './common.css';
+
+@source '../components';
+@source '../desktop';
+@source '../lib';

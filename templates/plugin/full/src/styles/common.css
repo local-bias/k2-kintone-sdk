@@ -1,0 +1,164 @@
+/*
+  プラグイン設定画面・デスクトップ画面で共通のテーマとスタイル
+
+  kintone 本体のスタイル (レイヤー外) に負けないよう、リセット用のスタイルはレイヤーに含めていません
+*/
+
+:root {
+  --ribbit-background: 0 0% 100%;
+  --ribbit-foreground: 224 71.4% 4.1%;
+
+  --ribbit-card: 0 0% 100%;
+  --ribbit-card-foreground: 224 71.4% 4.1%;
+
+  --ribbit-popover: 0 0% 100%;
+  --ribbit-popover-foreground: 224 71.4% 4.1%;
+
+  --ribbit-primary: 204 70% 53%;
+  --ribbit-primary-foreground: 210 20% 98%;
+
+  --ribbit-secondary: 220 14.3% 95.9%;
+  --ribbit-secondary-foreground: 220.9 39.3% 11%;
+
+  --ribbit-muted: 220 14.3% 95.9%;
+  --ribbit-muted-foreground: 220 8.9% 46.1%;
+
+  --ribbit-accent: 220 14.3% 95.9%;
+  --ribbit-accent-foreground: 220.9 39.3% 11%;
+
+  --ribbit-destructive: 0 84.2% 60.2%;
+  --ribbit-destructive-foreground: 210 20% 98%;
+
+  --ribbit-border: 220 13% 91%;
+  --ribbit-input: 220 13% 91%;
+  --ribbit-ring: 224 71.4% 4.1%;
+
+  --ribbit-radius: 8px;
+}
+
+/* kintone のルートフォントサイズに依存しないよう、px 単位で定義します */
+@theme inline {
+  --spacing: 4px;
+
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 18px;
+  --text-lg--line-height: 28px;
+  --text-xl: 20px;
+  --text-xl--line-height: 32px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 36px;
+
+  --color-border: hsl(var(--ribbit-border));
+  --color-input: hsl(var(--ribbit-input));
+  --color-ring: hsl(var(--ribbit-ring));
+  --color-background: hsl(var(--ribbit-background));
+  --color-foreground: hsl(var(--ribbit-foreground));
+  --color-primary: hsl(var(--ribbit-primary));
+  --color-primary-foreground: hsl(var(--ribbit-primary-foreground));
+  --color-secondary: hsl(var(--ribbit-secondary));
+  --color-secondary-foreground: hsl(var(--ribbit-secondary-foreground));
+  --color-destructive: hsl(var(--ribbit-destructive));
+  --color-destructive-foreground: hsl(var(--ribbit-destructive-foreground));
+  --color-muted: hsl(var(--ribbit-muted));
+  --color-muted-foreground: hsl(var(--ribbit-muted-foreground));
+  --color-accent: hsl(var(--ribbit-accent));
+  --color-accent-foreground: hsl(var(--ribbit-accent-foreground));
+  --color-popover: hsl(var(--ribbit-popover));
+  --color-popover-foreground: hsl(var(--ribbit-popover-foreground));
+  --color-card: hsl(var(--ribbit-card));
+  --color-card-foreground: hsl(var(--ribbit-card-foreground));
+
+  --radius-lg: var(--ribbit-radius);
+  --radius-md: calc(var(--ribbit-radius) - 2px);
+  --radius-sm: calc(var(--ribbit-radius) - 4px);
+
+  --font-sans: var(--ribbit-font-sans, ui-sans-serif, system-ui, sans-serif);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+.🐸 {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  blockquote,
+  dl,
+  dd,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr,
+  figure,
+  p,
+  pre {
+    margin: 0;
+  }
+  fieldset {
+    margin: 0;
+    padding: 0;
+  }
+  legend {
+    padding: 0;
+  }
+  ol,
+  ul,
+  menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+}
+
+.MuiAutocomplete-popper[role='presentation'] {
+  ::-webkit-scrollbar {
+    width: calc(var(--spacing) * 2);
+    height: calc(var(--spacing) * 2);
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: calc(infinity * 1px);
+    background-color: var(--color-gray-300);
+  }
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
