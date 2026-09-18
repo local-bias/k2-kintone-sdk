@@ -1,8 +1,6 @@
-export const getDefaultK2Config = (): K2.Config => {
-  return {
-    version: 1,
-    server: {
-      port: 32768,
-    },
-  };
-};
+import { DEFAULT_PORT } from './constants.js';
+
+export const getDefaultK2Config = (): K2.Config => ({
+  version: 1,
+  server: { port: DEFAULT_PORT },
+});

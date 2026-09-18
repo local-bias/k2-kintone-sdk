@@ -2,11 +2,30 @@ import chokidar from 'chokidar';
 import cssnanoPlugin from 'cssnano';
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import path from 'path';
+import path from 'node:path';
 import postcss from 'postcss';
-import { debounce } from 'remeda';
-import tailwindcss from '@tailwindcss/postcss';
 import invariant from 'tiny-invariant';
+import { debounce } from './debounce.js';
+
+/** contentの変更を検知してからCSSを再生成するまでの待機時間 */
+const REBUILD_DEBOUNCE_MS = 1000;
+
+/** contentの監視対象のデフォルトglobパターン */
+const DEFAULT_CONTENT_PATTERNS = ['./src/**/*.{ts,tsx}'];
+
+/**
+ * Tailwind CSS はオプショナルなpeerDependencyのため、実際に使用されるまで読み込みません
+ */
+const loadTailwindPostcssPlugin = async () => {
+  try {
+    const { default: tailwindcss } = await import('@tailwindcss/postcss');
+    return tailwindcss;
+  } catch {
+    throw new Error(
+      'Tailwind CSS を利用するには `@tailwindcss/postcss` と `tailwindcss` のインストールが必要です。'
+    );
+  }
+};
 
 export const getTailwindInputCss = (
   config: Plugin.Meta.Config['tailwind']
@@ -30,6 +49,7 @@ export const outputCss = async (params: {
 }) => {
   const { inputPath, outputPath, minify = false } = params;
 
+  const tailwindcss = await loadTailwindPostcssPlugin();
   const css = await fs.readFile(inputPath, 'utf8');
 
   const result = await postcss([
@@ -40,10 +60,10 @@ export const outputCss = async (params: {
     to: outputPath,
   });
 
-  await fs.writeFile(outputPath, result.css);
+  await fs.outputFile(outputPath, result.css);
 
   if (result.map) {
-    await fs.writeFile(`${outputPath}.map`, result.map.toString());
+    await fs.outputFile(`${outputPath}.map`, result.map.toString());
   }
 };
 
@@ -59,53 +79,34 @@ export const watchTailwindCSS = async (params: {
   /** callback function */
   onChanges?: (params: { input: string; output: string; type: WatchType }) => void;
 }) => {
-  const { input, output, contentPatterns } = params;
+  const { input, output, contentPatterns = DEFAULT_CONTENT_PATTERNS, onChanges } = params;
 
-  const patterns = contentPatterns ?? ['./src/**/*.{ts,tsx}'];
+  // chokidar v4 は glob パターンを解釈しないため、事前にファイル一覧へ展開します
+  const files = await glob([...contentPatterns, input], { ignore: ['**/node_modules/**'] });
 
-  const files = await glob([...patterns, input], { ignore: ['**/node_modules/**'] });
-
-  const watcher = chokidar.watch(files, {
-    persistent: true,
-    ignoreInitial: true,
-  });
-
-  let isInitialized = false;
+  const watcher = chokidar.watch(files, { persistent: true, ignoreInitial: true });
 
   const processChanges = async (type: WatchType) => {
     try {
       await outputCss({ inputPath: input, outputPath: output });
-      params.onChanges?.({ input, output, type });
+      onChanges?.({ input, output, type });
     } catch (error) {
       console.error('Error building Tailwind CSS:', error);
     }
   };
 
-  const debouncedProcessChanges = debounce(processChanges, { waitMs: 1000 });
+  const debouncedProcessChanges = debounce(processChanges, REBUILD_DEBOUNCE_MS);
 
-  watcher.on('ready', async () => {
-    if (!isInitialized) {
-      isInitialized = true;
-      await processChanges('init');
-    }
+  watcher.once('ready', () => {
+    void processChanges('init');
   });
-
   watcher.on('error', (error) => {
     console.error('Error watching Tailwind CSS:', error);
   });
-
-  watcher.on('add', (path) => {
-    debouncedProcessChanges.call('add');
-  });
-  watcher.on('change', (path) => {
-    debouncedProcessChanges.call('change');
-  });
-  watcher.on('unlink', (path) => {
-    debouncedProcessChanges.call('unlink');
-  });
-  watcher.on('unlinkDir', (path) => {
-    debouncedProcessChanges.call('unlink');
-  });
+  watcher.on('add', () => debouncedProcessChanges('add'));
+  watcher.on('change', () => debouncedProcessChanges('change'));
+  watcher.on('unlink', () => debouncedProcessChanges('unlink'));
+  watcher.on('unlinkDir', () => debouncedProcessChanges('unlink'));
 
   return watcher;
 };

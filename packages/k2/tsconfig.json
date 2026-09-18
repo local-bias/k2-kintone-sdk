@@ -1,22 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "types": ["node"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
 
     "strict": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
 
     "skipLibCheck": true,
-    "outDir": "dist",
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
   },
-  "include": ["src/**/*.ts"],
-  "files": ["types.d.ts"],
+  "include": ["src/**/*.ts", "types/**/*.d.ts", "types.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

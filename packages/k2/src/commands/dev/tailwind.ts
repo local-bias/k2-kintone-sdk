@@ -1,7 +1,9 @@
-import path from 'path';
-import chalk from 'chalk';
-import { watchTailwindCSS } from '../../lib/tailwind.js';
 import fs from 'fs-extra';
+import path from 'node:path';
+import { logEvent } from '../../lib/log-format.js';
+import { watchTailwindCSS } from '../../lib/tailwind.js';
+
+const OUTPUT_FILE_NAME = 'tailwind.css';
 
 export const watchCss = async (params: { k2Config: K2.Config; outdir: string }) => {
   const { k2Config, outdir } = params;
@@ -10,23 +12,20 @@ export const watchCss = async (params: { k2Config: K2.Config; outdir: string }) 
     return;
   }
 
-  const input = path.resolve(k2Config.tailwind.css);
-  const output = path.join(outdir, 'tailwind.css');
+  const output = path.join(outdir, k2Config.tailwind.fileName ?? OUTPUT_FILE_NAME);
 
+  // 初回コンパイル前でも開発サーバーが404を返さないよう、空ファイルを用意しておきます
   if (!(await fs.pathExists(output))) {
     await fs.outputFile(output, '');
   }
 
   return watchTailwindCSS({
-    input,
-    output: path.join(outdir, 'tailwind.css'),
+    input: path.resolve(k2Config.tailwind.css),
+    output,
     onChanges: ({ output, type }) => {
-      const outputFileName = path.basename(output);
-      console.log(
-        chalk.hex('#e5e7eb')(`${new Date().toLocaleTimeString()} `) +
-          chalk.cyan(`[css] `) +
-          outputFileName +
-          (type === 'init' ? ' init' : ` rebuilt(${type})`)
+      logEvent(
+        'css',
+        `${path.basename(output)}${type === 'init' ? ' init' : ` rebuilt(${type})`}`
       );
     },
   });

@@ -1,54 +1,47 @@
-import fs from 'fs-extra';
-import path from 'path';
 import { zipSync } from 'fflate';
+import fs from 'fs-extra';
+import path from 'node:path';
 import { PLUGIN_CONTENTS_DIRECTORY } from './constants.js';
-import { sign, getPublicKeyDer, generatePPK, generatePluginId } from './rsa.js';
+import { generatePPK, generatePluginId, getPublicKeyDer, sign } from './rsa.js';
+
+/** manifest.json 内でカスタマイズファイルを保持しているプロパティ */
+const RESOURCE_KEYS = ['desktop', 'mobile', 'config'] as const satisfies readonly (keyof Plugin.Meta.Manifest)[];
+
+/** 外部URLはZIPに含めないため除外します */
+const isExternalUrl = (file: string): boolean => /^https?:\/\//.test(file);
 
 /**
  * manifest.json からプラグインに必要なソースファイル一覧を抽出します
  */
 export function sourceList(manifest: Plugin.Meta.Manifest): string[] {
-  const sourceTypes: [string, string][] = [
-    ['desktop', 'js'],
-    ['desktop', 'css'],
-    ['mobile', 'js'],
-    ['mobile', 'css'],
-    ['config', 'js'],
-    ['config', 'css'],
-  ];
+  const files = RESOURCE_KEYS.flatMap((key) => {
+    const resources = manifest[key];
+    return [...(resources?.js ?? []), ...(resources?.css ?? [])];
+  }).filter((file) => !isExternalUrl(file));
 
-  const list = sourceTypes
-    .map(([type, ext]) => (manifest as any)[type]?.[ext])
-    .filter(Boolean)
-    .reduce<string[]>((a, b) => a.concat(b), [])
-    .filter((file: string) => !/^https?:\/\//.test(file));
+  if (manifest.config?.html) {
+    files.push(manifest.config.html);
+  }
+  files.push(manifest.icon);
 
-  if (manifest.config?.html) list.push(manifest.config.html);
-  list.push(manifest.icon);
-  return Array.from(new Set(list));
+  return [...new Set(files)];
 }
 
 /**
  * ファイルのレコードからZIPバッファを生成します
+ *
+ * 値が Buffer の場合はその内容を、文字列の場合はそのパスのファイル内容を格納します
  */
 export function zipFiles(files: Record<string, Buffer | string>): Buffer {
   const zipObj: Record<string, Uint8Array> = {};
 
   for (const [fileName, fileContent] of Object.entries(files)) {
-    let content: Uint8Array;
-    if (Buffer.isBuffer(fileContent)) {
-      content = new Uint8Array(fileContent);
-    } else if (typeof fileContent === 'string') {
-      const fileData = fs.readFileSync(fileContent);
-      content = new Uint8Array(fileData);
-    } else {
-      throw new Error(`Unsupported file content type for file: ${fileName}`);
-    }
-    zipObj[fileName] = content;
+    zipObj[fileName] = new Uint8Array(
+      Buffer.isBuffer(fileContent) ? fileContent : fs.readFileSync(fileContent)
+    );
   }
 
-  const zipped = zipSync(zipObj);
-  return Buffer.from(zipped);
+  return Buffer.from(zipSync(zipObj));
 }
 
 /**
@@ -59,22 +52,25 @@ export function createContentsZip(
   manifest: Plugin.Meta.Manifest,
   fileContents: Record<string, Buffer | string> = {}
 ): Buffer {
-  const files = sourceList(manifest).reduce<Record<string, Buffer | string>>((acc, file) => {
-    acc[file] = fileContents[file] || path.join(contentsDir, file);
-    return acc;
-  }, {});
+  const files: Record<string, Buffer | string> = {};
+  for (const file of sourceList(manifest)) {
+    files[file] = fileContents[file] ?? path.join(contentsDir, file);
+  }
 
   files['manifest.json'] = Buffer.from(JSON.stringify(manifest, null, 2));
 
-  const targetFiles = Object.keys(files);
+  logTargetFiles(Object.keys(files));
+
+  return zipFiles(files);
+}
+
+function logTargetFiles(fileNames: string[]): void {
   console.group('📁 Target files');
-  targetFiles.forEach((file, i) => {
-    const prefix = i === targetFiles.length - 1 ? '└─' : '├─';
+  fileNames.forEach((file, i) => {
+    const prefix = i === fileNames.length - 1 ? '└─' : '├─';
     console.log(`${prefix} 📄 ${file}`);
   });
   console.groupEnd();
-
-  return zipFiles(files);
 }
 
 /**
@@ -87,6 +83,8 @@ export function createContentsZipFromDir(manifest: Plugin.Meta.Manifest): Buffer
 
 /**
  * 秘密鍵を使用してプラグインZIPを生成します (contents.zip + PUBKEY + SIGNATURE)
+ *
+ * 秘密鍵が存在しない場合は新規に生成します
  */
 export function createPluginZip(params: { ppkPath: string; contentsZip: Buffer }): {
   zip: Buffer;
@@ -95,26 +93,24 @@ export function createPluginZip(params: { ppkPath: string; contentsZip: Buffer }
 } {
   const { ppkPath, contentsZip } = params;
 
-  let ppkContent: string;
-  if (fs.existsSync(ppkPath)) {
-    ppkContent = fs.readFileSync(ppkPath, 'utf-8');
-  } else {
-    ppkContent = generatePPK(ppkPath);
-  }
+  const ppkContent = fs.existsSync(ppkPath)
+    ? fs.readFileSync(ppkPath, 'utf-8')
+    : generatePPK(ppkPath);
 
-  const signature = sign(contentsZip, ppkContent);
   const publicKeyDer = getPublicKeyDer(ppkContent);
-  const pluginId = generatePluginId(publicKeyDer);
 
-  const pluginZip = zipFiles({
+  const zip = zipFiles({
     'contents.zip': contentsZip,
     PUBKEY: publicKeyDer,
-    SIGNATURE: signature,
+    SIGNATURE: sign(contentsZip, ppkContent),
   });
 
-  return { zip: pluginZip, id: pluginId, privateKey: ppkContent };
+  return { zip, id: generatePluginId(publicKeyDer), privateKey: ppkContent };
 }
 
-export const getZipFileNameSuffix = (env: string): string => {
-  return env === 'prod' ? '' : `-${env}`;
-};
+export const getZipFileNameSuffix = (env: Plugin.Meta.Env): string =>
+  env === 'prod' ? '' : `-${env}`;
+
+/** 環境に応じたプラグインZIPのファイル名を返します */
+export const getPluginZipFileName = (env: Plugin.Meta.Env): string =>
+  `plugin${getZipFileNameSuffix(env)}.zip`;

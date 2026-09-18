@@ -1,13 +1,56 @@
 declare namespace K2 {
   /**
+   * kintoneが対応している言語のロケール
+   */
+  type Locales = {
+    /** 日本語 */
+    ja: string;
+    /** 英語 */
+    en: string;
+    /** 簡体字中国語 */
+    zh: string;
+    /** 繁体字中国語 */
+    'zh-TW': string;
+    /** スペイン語 */
+    es: string;
+    /** ポルトガル語(ブラジル) */
+    'pt-BR': string;
+    /** タイ語 */
+    th: string;
+    /** マレー語 */
+    ms: string;
+  };
+
+  /**
+   * kintoneに読み込ませるカスタマイズファイル
+   */
+  type Resources = {
+    /**
+     * プラグインのJavaScriptファイル
+     *
+     * URLの配列
+     */
+    js: string[];
+    /**
+     * プラグインのCSSファイル
+     *
+     * URLの配列
+     */
+    css: string[];
+  };
+
+  /** ローカル開発サーバーの設定 */
+  type ServerConfig = {
+    /** 0から65535までのポート番号 */
+    port?: number;
+  };
+
+  /**
    * 公開しているプラグインテンプレートで使用する設定ファイル
    */
-  type Config = Record<string, any> & {
+  type Config = {
     version?: 1;
-    server?: {
-      /** 0から65535までのポート番号 */
-      port?: number;
-    };
+    server?: ServerConfig;
 
     /**
      * tailwindcssを使用している場合、CSSファイルのパスを指定することで、JavaScriptファイルのビルド時にCSSファイルを生成します
@@ -41,39 +84,5 @@ declare namespace K2 {
 
   type FullConfig = Config & {
     outDir: string;
-  };
-
-  type Locales = {
-    /** 日本語 */
-    ja: string;
-    /** 英語 */
-    en: string;
-    /** 簡体字中国語 */
-    zh: string;
-    /** 繁体字中国語 */
-    'zh-TW': string;
-    /** スペイン語 */
-    es: string;
-    /** ポルトガル語(ブラジル) */
-    'pt-BR': string;
-    /** タイ語 */
-    th: string;
-    /** マレー語 */
-    ms: string;
-  };
-
-  type Resources = {
-    /**
-     * プラグインのJavaScriptファイル
-     *
-     * URLの配列
-     */
-    js: string[];
-    /**
-     * プラグインのCSSファイル
-     *
-     * URLの配列
-     */
-    css: string[];
   };
 }

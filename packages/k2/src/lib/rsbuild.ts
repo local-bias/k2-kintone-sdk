@@ -1,20 +1,49 @@
 import { createRsbuild, type RsbuildConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
-import path from 'path';
 import fs from 'fs-extra';
+import path from 'node:path';
+import { ENTRY_POINT_FILE_NAMES } from './constants.js';
+
+type SourceMapConfig = NonNullable<NonNullable<RsbuildConfig['output']>['sourceMap']>;
+type JsSourceMap = NonNullable<SourceMapConfig>['js'];
+
+/** HMR用の中間ファイルの識別子 */
+const HOT_UPDATE_MARKER = '.hot-update.';
 
 function getRsbuildPlugins() {
-  return [
-    pluginReact({
-      swcReactOptions: {
-        runtime: 'automatic',
-      },
-    }),
-  ];
+  return [pluginReact({ swcReactOptions: { runtime: 'automatic' } })];
 }
 
-function shouldWriteDevAssetToDisk(file: string): boolean {
-  return !file.includes('.hot-update.');
+/** rsbuild の共通設定 (本番ビルド / 開発サーバーで共有) */
+function getBaseRsbuildConfig(params: {
+  entries: Record<string, string>;
+  outDir: string;
+  minify: boolean;
+  sourceMap: JsSourceMap;
+  injectStyles: boolean;
+  cleanDistPath: boolean;
+}): RsbuildConfig {
+  const { entries, outDir, minify, sourceMap, injectStyles, cleanDistPath } = params;
+  return {
+    plugins: getRsbuildPlugins(),
+    source: { entry: entries },
+    output: {
+      target: 'web',
+      distPath: { root: outDir, js: '' },
+      filename: { js: '[name].js' },
+      filenameHash: false,
+      cleanDistPath,
+      injectStyles,
+      sourceMap: { js: sourceMap },
+      minify,
+    },
+    performance: {
+      chunkSplit: { strategy: 'all-in-one' },
+    },
+    tools: {
+      htmlPlugin: false,
+    },
+  };
 }
 
 async function removeHotUpdateFiles(outDir: string): Promise<void> {
@@ -22,12 +51,10 @@ async function removeHotUpdateFiles(outDir: string): Promise<void> {
     return;
   }
 
-  const fileNames = (await fs.readdir(outDir, { encoding: 'utf8' })).map((fileName) =>
-    fileName.toString()
-  );
+  const fileNames = await fs.readdir(outDir, { encoding: 'utf8' });
   await Promise.all(
     fileNames
-      .filter((fileName) => fileName.includes('.hot-update.'))
+      .filter((fileName) => fileName.includes(HOT_UPDATE_MARKER))
       .map((fileName) => fs.remove(path.join(outDir, fileName)))
   );
 }
@@ -44,30 +71,18 @@ export async function buildWithRsbuild(params: {
 }): Promise<void> {
   const { entries, outDir, minify = true, sourcemap = false, injectStyles = true } = params;
 
-  const sourceMapConfig =
+  const sourceMap: JsSourceMap =
     sourcemap === 'inline' ? 'cheap-module-source-map' : sourcemap ? 'source-map' : false;
 
   const rsbuild = await createRsbuild({
-    rsbuildConfig: {
-      plugins: getRsbuildPlugins(),
-      source: { entry: entries },
-      output: {
-        target: 'web',
-        distPath: { root: outDir, js: '' },
-        filename: { js: '[name].js' },
-        filenameHash: false,
-        cleanDistPath: true,
-        injectStyles,
-        sourceMap: { js: sourceMapConfig as any },
-        minify,
-      },
-      performance: {
-        chunkSplit: { strategy: 'all-in-one' },
-      },
-      tools: {
-        htmlPlugin: false,
-      },
-    },
+    rsbuildConfig: getBaseRsbuildConfig({
+      entries,
+      outDir,
+      minify,
+      sourceMap,
+      injectStyles,
+      cleanDistPath: true,
+    }),
   });
 
   await rsbuild.build();
@@ -90,24 +105,14 @@ export async function startRsbuildDevServer(params: {
   await removeHotUpdateFiles(outDir);
 
   const rsbuildConfig: RsbuildConfig = {
-    plugins: getRsbuildPlugins(),
-    source: { entry: entries },
-    output: {
-      target: 'web',
-      distPath: { root: outDir, js: '' },
-      filename: { js: '[name].js' },
-      filenameHash: false,
-      cleanDistPath: false,
-      injectStyles: true,
-      sourceMap: { js: 'cheap-module-source-map' as any },
+    ...getBaseRsbuildConfig({
+      entries,
+      outDir,
       minify: false,
-    },
-    performance: {
-      chunkSplit: { strategy: 'all-in-one' },
-    },
-    tools: {
-      htmlPlugin: false,
-    },
+      sourceMap: 'cheap-module-source-map',
+      injectStyles: true,
+      cleanDistPath: false,
+    }),
     server: {
       port,
       host: '0.0.0.0',
@@ -115,7 +120,8 @@ export async function startRsbuildDevServer(params: {
       ...(publicDir && fs.existsSync(publicDir) ? { publicDir: { name: publicDir } } : {}),
     },
     dev: {
-      writeToDisk: shouldWriteDevAssetToDisk,
+      // HMR用の中間ファイルはディスクに書き出さない
+      writeToDisk: (file) => !file.includes(HOT_UPDATE_MARKER),
     },
   };
 
@@ -127,23 +133,25 @@ export async function startRsbuildDevServer(params: {
         name: 'k2-dev-hooks',
         setup(api) {
           api.onAfterDevCompile(async ({ isFirstCompile }) => {
-            if (isFirstCompile && onFirstCompile) {
-              await onFirstCompile();
-            } else if (!isFirstCompile && onRecompile) {
-              await onRecompile();
-            }
+            await (isFirstCompile ? onFirstCompile?.() : onRecompile?.());
           });
         },
       },
     ]);
   }
 
-  const result = await rsbuild.startDevServer();
+  const { port: actualPort, server } = await rsbuild.startDevServer();
 
-  return {
-    port: result.port,
-    close: result.server.close,
-  };
+  return { port: actualPort, close: () => server.close() };
+}
+
+/**
+ * ディレクトリ内の `index.{ts,tsx,js,jsx,mjs}` を解決します
+ */
+function resolveEntryPoint(dir: string): string | undefined {
+  return ENTRY_POINT_FILE_NAMES.map((fileName) => path.join(dir, fileName)).find((filePath) =>
+    fs.existsSync(filePath)
+  );
 }
 
 /**
@@ -153,22 +161,15 @@ export function getPluginEntryPoints(params: {
   configEntry: string;
   desktopEntry: string;
 }): Record<string, string> {
-  const { configEntry, desktopEntry } = params;
   const entries: Record<string, string> = {};
 
-  for (const ext of ['index.ts', 'index.tsx', 'index.js', 'index.jsx']) {
-    const configPath = path.join(configEntry, ext);
-    if (fs.existsSync(configPath)) {
-      entries.config = configPath;
-      break;
-    }
-  }
-
-  for (const ext of ['index.ts', 'index.tsx', 'index.js', 'index.jsx']) {
-    const desktopPath = path.join(desktopEntry, ext);
-    if (fs.existsSync(desktopPath)) {
-      entries.desktop = desktopPath;
-      break;
+  for (const [name, dir] of Object.entries({
+    config: params.configEntry,
+    desktop: params.desktopEntry,
+  })) {
+    const filePath = resolveEntryPoint(dir);
+    if (filePath) {
+      entries[name] = filePath;
     }
   }
 
@@ -183,17 +184,18 @@ export function getAppEntryPoints(inputDir: string): Record<string, string> {
     return {};
   }
 
-  const allProjects = fs.readdirSync(inputDir);
-  return allProjects.reduce<Record<string, string>>((acc, dir) => {
-    const dirPath = path.join(inputDir, dir);
-    if (!fs.statSync(dirPath).isDirectory()) return acc;
+  const entries: Record<string, string> = {};
 
-    for (const filename of ['index.ts', 'index.tsx', 'index.js', 'index.jsx', 'index.mjs']) {
-      const filePath = path.join(inputDir, dir, filename);
-      if (fs.existsSync(filePath)) {
-        return { ...acc, [dir]: filePath };
-      }
+  for (const dirName of fs.readdirSync(inputDir)) {
+    const dirPath = path.join(inputDir, dirName);
+    if (!fs.statSync(dirPath).isDirectory()) {
+      continue;
     }
-    return acc;
-  }, {});
+    const filePath = resolveEntryPoint(dirPath);
+    if (filePath) {
+      entries[dirName] = filePath;
+    }
+  }
+
+  return entries;
 }

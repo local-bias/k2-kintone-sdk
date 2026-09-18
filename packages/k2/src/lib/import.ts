@@ -1,21 +1,23 @@
-import { pathToFileURL } from 'url';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { CONFIG_FILE_NAME, PLUGIN_CONFIG_FILE_NAME } from './constants.js';
-import path from 'path';
 
-export const esmImport = (path: string) => {
-  if (process.platform === 'win32') {
-    return import(pathToFileURL(path).toString());
-  } else {
-    return import(path);
-  }
+/**
+ * 絶対パス・相対パスのどちらでも動作するように file URL 経由で ESM を読み込みます
+ *
+ * Windows ではドライブレターがプロトコルとして解釈されるため、file URL への変換が必須です
+ */
+export const esmImport = async (modulePath: string): Promise<Record<string, unknown>> => {
+  return import(pathToFileURL(path.resolve(modulePath)).href);
 };
 
-export const importK2Config = async (configFileName?: string): Promise<K2.Config> => {
-  return (await esmImport(path.resolve(configFileName ?? CONFIG_FILE_NAME))).default;
+const importDefault = async <T>(modulePath: string): Promise<T> => {
+  const loaded = await esmImport(modulePath);
+  return loaded.default as T;
 };
 
-export const importK2PluginConfig = async (
-  configFileName?: string
-): Promise<Plugin.Meta.Config> => {
-  return (await esmImport(path.resolve(configFileName ?? PLUGIN_CONFIG_FILE_NAME))).default;
-};
+export const importK2Config = (configFileName?: string): Promise<K2.Config> =>
+  importDefault<K2.Config>(configFileName ?? CONFIG_FILE_NAME);
+
+export const importK2PluginConfig = (configFileName?: string): Promise<Plugin.Meta.Config> =>
+  importDefault<Plugin.Meta.Config>(configFileName ?? PLUGIN_CONFIG_FILE_NAME);

@@ -1,11 +1,10 @@
 import { program } from 'commander';
-import { outputManifest } from '../lib/plugin-manifest.js';
 import fs from 'fs-extra';
-import path from 'path';
-import { PLUGIN_WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import { createContentsZipFromDir, createPluginZip, getZipFileNameSuffix } from '../lib/zip.js';
+import path from 'node:path';
+import { PLUGIN_WORKSPACE_DIRECTORY, PRIVATE_KEY_FILE_NAME } from '../lib/constants.js';
 import { copyPluginContents } from '../lib/plugin-contents.js';
-import { isEnv } from '../lib/utils.js';
+import { outputManifest } from '../lib/plugin-manifest.js';
+import { isEnv, writePluginZip } from '../lib/utils.js';
 
 export default function command(): void {
   program
@@ -15,7 +14,7 @@ export default function command(): void {
     .option(
       '-p, --ppk <ppk>',
       '.ppk file path',
-      path.join(PLUGIN_WORKSPACE_DIRECTORY, 'private.ppk')
+      path.join(PLUGIN_WORKSPACE_DIRECTORY, PRIVATE_KEY_FILE_NAME)
     )
     .action(action);
 }
@@ -25,7 +24,7 @@ async function action(options: { env: string; ppk: string }): Promise<void> {
   try {
     const { env, ppk: ppkPath } = options;
     if (!isEnv(env)) {
-      throw new Error('Invalid environment');
+      throw new Error(`Invalid environment: "${env}". Use one of dev, prod, standalone.`);
     }
 
     await copyPluginContents();
@@ -34,24 +33,17 @@ async function action(options: { env: string; ppk: string }): Promise<void> {
     const manifest = await outputManifest(env);
     console.log(`📝 manifest.json generated (${env})`);
 
-    const contentsZip = createContentsZipFromDir(manifest);
-    console.log('📦 contents.zip generated');
-
-    const { zip, id } = createPluginZip({ ppkPath: path.resolve(ppkPath), contentsZip });
-
-    const zipFileName = `plugin${getZipFileNameSuffix(env)}.zip`;
-    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName), zip);
+    const { pluginId, zipFileName } = await writePluginZip({ env, manifest, ppkPath });
     console.log('📦 plugin.zip generated');
 
-    // version ファイルを出力
     const version = String(manifest.version);
-    await fs.writeFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'version'), version);
+    await fs.outputFile(path.join(PLUGIN_WORKSPACE_DIRECTORY, 'version'), version);
     console.log(`📝 version file generated (${version})`);
 
-    console.log(`✨ Plugin zip generation completed! zip file path is ./.plugin/${zipFileName}`);
-    console.log(`   Plugin ID: ${id}`);
-  } catch (error) {
-    throw error;
+    console.log(
+      `✨ Plugin zip generation completed! zip file path is ./${path.join(PLUGIN_WORKSPACE_DIRECTORY, zipFileName)}`
+    );
+    console.log(`   Plugin ID: ${pluginId}`);
   } finally {
     console.groupEnd();
   }

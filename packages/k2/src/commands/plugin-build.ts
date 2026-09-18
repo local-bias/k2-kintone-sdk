@@ -1,11 +1,40 @@
+import chalk from 'chalk';
 import { program } from 'commander';
 import fs from 'fs-extra';
-import path from 'path';
-import chalk from 'chalk';
+import path from 'node:path';
 import { PLUGIN_CONTENTS_DIRECTORY } from '../lib/constants.js';
 import { importK2PluginConfig } from '../lib/import.js';
-import { getTailwindInputCss, outputCss } from '../lib/tailwind.js';
 import { buildWithRsbuild, getPluginEntryPoints } from '../lib/rsbuild.js';
+import { getTailwindInputCss, outputCss } from '../lib/tailwind.js';
+
+/** プラグインのエントリーポイントとなるディレクトリ */
+export const PLUGIN_ENTRY_DIRS = {
+  configEntry: path.join('src', 'config'),
+  desktopEntry: path.join('src', 'desktop'),
+} as const;
+
+export const resolvePluginEntryPoints = () =>
+  getPluginEntryPoints({
+    configEntry: path.resolve(PLUGIN_ENTRY_DIRS.configEntry),
+    desktopEntry: path.resolve(PLUGIN_ENTRY_DIRS.desktopEntry),
+  });
+
+/**
+ * エントリーポイントを解決し、1件も見つからなければエラーにします
+ */
+export const resolvePluginEntryPointsOrThrow = (): Record<string, string> => {
+  const entries = resolvePluginEntryPoints();
+
+  if (Object.keys(entries).length === 0) {
+    throw new Error(
+      `No entry points found for plugin. Check ${PLUGIN_ENTRY_DIRS.configEntry} and ${PLUGIN_ENTRY_DIRS.desktopEntry} paths.`
+    );
+  }
+
+  console.log(chalk.gray(`  Entry points: ${Object.keys(entries).join(', ')}`));
+
+  return entries;
+};
 
 export default function command() {
   program
@@ -14,48 +43,37 @@ export default function command() {
     .action(action);
 }
 
+async function buildTailwind(config: Plugin.Meta.Config): Promise<void> {
+  if (!config.tailwind?.css) {
+    return;
+  }
+
+  const inputFile = getTailwindInputCss(config.tailwind);
+
+  for (const [name, inputPath] of [
+    ['config.css', inputFile.config],
+    ['desktop.css', inputFile.desktop],
+  ] as const) {
+    await outputCss({
+      inputPath,
+      outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, name),
+      minify: true,
+    });
+    console.log(`✨ Built ${name}`);
+  }
+}
+
 export async function action() {
   console.group('🍳 Build the plugin for production');
 
   try {
     const config = await importK2PluginConfig();
 
-    if (!fs.existsSync(PLUGIN_CONTENTS_DIRECTORY)) {
-      await fs.mkdir(PLUGIN_CONTENTS_DIRECTORY, { recursive: true });
-    }
+    await fs.ensureDir(PLUGIN_CONTENTS_DIRECTORY);
 
-    // Tailwind CSS ビルド
-    if (config.tailwind?.css) {
-      const inputFile = getTailwindInputCss(config.tailwind);
+    const entries = resolvePluginEntryPointsOrThrow();
 
-      await outputCss({
-        inputPath: inputFile.config,
-        outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'config.css'),
-        minify: true,
-      });
-      console.log('✨ Built config.css');
-
-      await outputCss({
-        inputPath: inputFile.desktop,
-        outputPath: path.join(PLUGIN_CONTENTS_DIRECTORY, 'desktop.css'),
-        minify: true,
-      });
-      console.log('✨ Built desktop.css');
-    }
-
-    // rsbuild でJSビルド
-    const entries = getPluginEntryPoints({
-      configEntry: path.resolve('src', 'config'),
-      desktopEntry: path.resolve('src', 'desktop'),
-    });
-
-    const entryNames = Object.keys(entries);
-    if (entryNames.length === 0) {
-      throw new Error('No entry points found for plugin. Check src/config and src/desktop paths.');
-    }
-
-    console.log(chalk.gray(`  Entry points: ${entryNames.join(', ')}`));
-
+    // rsbuild は出力先を一度クリーンするため、CSSの出力より先に実行する必要があります
     await buildWithRsbuild({
       entries,
       outDir: PLUGIN_CONTENTS_DIRECTORY,
@@ -65,9 +83,9 @@ export async function action() {
     });
 
     console.log('✨ Built desktop.js and config.js');
+
+    await buildTailwind(config);
     console.log('✨ Build success.');
-  } catch (error) {
-    throw error;
   } finally {
     console.groupEnd();
   }

@@ -11,14 +11,10 @@ export default function command() {
 }
 
 export async function action(options: { output: string }) {
-  const { output } = options;
-
   console.group('🍳 Generate SSL certificate for localhost');
   try {
-    generateCert(output);
-    console.log(`🔑 Certificate generated. Output to ./${output}`);
-  } catch (error) {
-    throw error;
+    generateCert(options.output);
+    console.log(`🔑 Certificate generated. Output to ./${options.output}`);
   } finally {
     console.groupEnd();
   }

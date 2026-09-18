@@ -79,10 +79,7 @@ declare namespace Plugin {
       promotionPageUrl?: string;
       bannerPageUrl?: string;
       config_params?: Record<string, any>;
-      server?: {
-        /** 0から65535までのポート番号 */
-        port?: number;
-      };
+      server?: K2.ServerConfig;
 
       /**
        * tailwindcssを使用している場合、CSSファイルのパスを指定することで、JavaScriptファイルのビルド時にCSSファイルを生成します
@@ -123,37 +120,9 @@ declare namespace Plugin {
     };
   }
 
-  type Locales = {
-    /** 日本語 */
-    ja: string;
-    /** 英語 */
-    en: string;
-    /** 簡体字中国語 */
-    zh: string;
-    /** 繁体字中国語 */
-    'zh-TW': string;
-    /** スペイン語 */
-    es: string;
-    /** ポルトガル語(ブラジル) */
-    'pt-BR': string;
-    /** タイ語 */
-    th: string;
-    /** マレー語 */
-    ms: string;
-  };
+  /** @see {@link K2.Locales} */
+  type Locales = K2.Locales;
 
-  type Resources = {
-    /**
-     * プラグインのJavaScriptファイル
-     *
-     * URLの配列
-     */
-    js: string[];
-    /**
-     * プラグインのCSSファイル
-     *
-     * URLの配列
-     */
-    css: string[];
-  };
+  /** @see {@link K2.Resources} */
+  type Resources = K2.Resources;
 }

@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 export const WORKSPACE_DIRECTORY = '.k2';
 export const DEVELOPMENT_DIRECTORY = path.join(WORKSPACE_DIRECTORY, 'dev');
@@ -16,5 +16,17 @@ export const PLUGIN_DEVELOPMENT_DIRECTORY = path.join(PLUGIN_WORKSPACE_DIRECTORY
 /** kintoneプラグインの本番ビルド出力ディレクトリ */
 export const PLUGIN_PRODUCTION_DIRECTORY = path.join(PLUGIN_WORKSPACE_DIRECTORY, 'prod');
 
+/** kintoneプラグインの秘密鍵のファイル名 */
+export const PRIVATE_KEY_FILE_NAME = 'private.ppk';
+
 /** ローカルサーバーのデフォルトポート番号 */
 export const DEFAULT_PORT = 32767;
+
+/** エントリーポイントとして解決を試みるファイル名 */
+export const ENTRY_POINT_FILE_NAMES = [
+  'index.ts',
+  'index.tsx',
+  'index.js',
+  'index.jsx',
+  'index.mjs',
+] as const;

@@ -1,18 +1,18 @@
-import { program } from 'commander';
-import path from 'path';
 import chalk from 'chalk';
-import { WORKSPACE_DIRECTORY } from '../lib/constants.js';
-import { buildTailwind } from './build-tailwind.js';
-import { importK2Config } from '../lib/import.js';
+import { program } from 'commander';
+import path from 'node:path';
+import { CONFIG_FILE_NAME, PRODUCTION_DIRECTORY } from '../lib/constants.js';
+import { loadK2Config } from '../lib/import.js';
 import { getDefaultK2Config } from '../lib/k2.js';
 import { buildWithRsbuild, getAppEntryPoints } from '../lib/rsbuild.js';
+import { buildTailwind } from './build-tailwind.js';
 
 export default function command() {
   program
     .command('build')
-    .option('-o, --outdir <outdir>', 'Output directory.', path.join(WORKSPACE_DIRECTORY, 'prod'))
+    .option('-o, --outdir <outdir>', 'Output directory.', PRODUCTION_DIRECTORY)
     .option('-i, --input <input>', 'Input directory.', path.join('src', 'apps'))
-    .option('--config <config>', 'k2 config file path')
+    .option('--config <config>', `k2 config file path (default: ${CONFIG_FILE_NAME})`)
     .description('Build the project for production with rsbuild.')
     .action(action);
 }
@@ -33,28 +33,14 @@ export async function action(options: { outdir: string; input: string; config?: 
 
     console.log(chalk.gray(`  Entry points: ${entryNames.join(', ')}`));
 
-    const k2Config = config ? await importK2Config(config) : getDefaultK2Config();
+    const k2Config = (await loadK2Config(config)) ?? getDefaultK2Config();
     const fullConfig: K2.FullConfig = { ...k2Config, outDir };
 
-    const results = await Promise.allSettled([
-      buildWithRsbuild({
-        entries,
-        outDir,
-        minify: true,
-        sourcemap: false,
-        injectStyles: true,
-      }),
-      buildTailwind(fullConfig),
-    ]);
+    // rsbuild は出力先を一度クリーンするため、CSSの出力より先に実行する必要があります
+    await buildWithRsbuild({ entries, outDir, minify: true, sourcemap: false, injectStyles: true });
+    await buildTailwind(fullConfig);
 
-    for (const result of results) {
-      if (result.status === 'rejected') {
-        throw result.reason;
-      }
-    }
     console.log('✨ Build success.');
-  } catch (error) {
-    throw error;
   } finally {
     console.groupEnd();
   }
