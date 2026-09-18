@@ -1,4 +1,9 @@
 node_modules/
-jspm_packages/
 
-.k2
+# k2 の作業ディレクトリ (ビルド成果物・SSL証明書・プラグインの秘密鍵)
+.plugin/
+
+# kintone の認証情報を含むため、コミットしないでください
+.env
+.env.*
+!.env.sample
