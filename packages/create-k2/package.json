@@ -1,22 +1,33 @@
 {
   "name": "create-k2",
-  "version": "1.4.0",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Scaffold a kintone customization or plugin project for k2 (kintone kitchen)",
   "type": "module",
   "bin": {
-    "create-k2": "index.js"
+    "create-k2": "./index.js"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "files": [
+    "index.js"
+  ],
+  "engines": {
+    "node": ">=20.12.0"
   },
-  "keywords": [],
+  "keywords": [
+    "kintone",
+    "k2",
+    "create",
+    "template",
+    "scaffold"
+  ],
   "author": "Adachi Keiichiro",
   "license": "MIT",
-  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/local-bias/k2-kintone-sdk.git",
+    "directory": "packages/create-k2"
+  },
   "dependencies": {
-    "chalk": "^5.4.1",
-    "commander": "^13.1.0",
-    "prompts": "^2.4.2",
-    "tiged": "^2.12.7"
+    "@clack/prompts": "^1.8.1",
+    "giget": "^3.3.1"
   }
 }
