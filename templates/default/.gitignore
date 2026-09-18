@@ -1,4 +1,4 @@
 node_modules/
-jspm_packages/
 
-.k2
+# k2 の作業ディレクトリ (ビルド成果物・SSL証明書)
+.k2/
