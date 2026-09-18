@@ -10,6 +10,12 @@ export default /** @type { const } */ ({
   server: {
     port: 65535,
   },
+  tailwind: {
+    css: {
+      config: 'src/styles/config.css',
+      desktop: 'src/styles/desktop.css',
+    },
+  },
   manifest: {
     base: {
       manifest_version: 1,
@@ -19,19 +25,21 @@ export default /** @type { const } */ ({
         en: 'kintone-plugin-template',
         ja: 'プラグインテンプレート',
         zh: '插件模板',
-        'zh-TW': '插件模板',
+        'zh-TW': '外掛程式範本',
         es: 'Plantilla de complemento',
-        'pt-BR': 'Modelo de complemento',
+        'pt-BR': 'Modelo de plugin',
         th: 'แม่แบบปลั๊กอิน',
+        ms: 'Templat pemalam',
       },
       description: {
         en: 'kintone-plugin-template',
         ja: 'プラグインの説明をここに記載します',
         zh: '插件模板',
-        'zh-TW': '插件模板',
+        'zh-TW': '外掛程式範本',
         es: 'Plantilla de complemento',
-        'pt-BR': 'Modelo de complemento',
+        'pt-BR': 'Modelo de plugin',
         th: 'แม่แบบปลั๊กอิน',
+        ms: 'Templat pemalam',
       },
       icon: 'icon.png',
       homepage_url: { ja: hp, en: hp },
